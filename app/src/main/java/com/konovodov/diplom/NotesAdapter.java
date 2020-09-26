@@ -7,57 +7,54 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+
+import java.time.*;
 import java.util.List;
 
 public class NotesAdapter extends BaseAdapter {
 
     Context context;
-    private List<Note> notes;
 
     private LayoutInflater inflater;
+    private List<Note> noteList;
 
 
-    public NotesAdapter(Context context, List<Note> notes) {
+    public NotesAdapter(Context context, List<Note> noteList) {
         this.context = context;
-
+        this.noteList = noteList;
+/*
         if (this.notes == null) {
             this.notes = new ArrayList<>();
-        } else {
-            this.notes = this.notes;
         }
+*/
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     public void addNote(Note note) {
-        this.notes.add(note);
+        this.noteList.add(note);
         notifyDataSetChanged();
     }
 
     public void removeNote(int position) {
-        notes.remove(position);
+        noteList.remove(position);
         notifyDataSetChanged();
     }
 
-/*
-    public List<String> getAdapterStrings() {
-        List<String> list = new ArrayList<>();
-        for (Note item : notes) {
-            list.add(item.getTitle());
-        }
-        return list;
+    public List<Note> getNoteList() {
+        return noteList;
     }
-*/
 
     @Override
     public int getCount() {
-        return notes.size();
+        return noteList.size();
     }
 
     @Override
     public Note getItem(int position) {
-        if (position < notes.size()) {
-            return notes.get(position);
+        if (position < noteList.size()) {
+            return noteList.get(position);
         } else {
             return null;
         }
@@ -72,20 +69,63 @@ public class NotesAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if (view == null) {
-            view = inflater.inflate(R.layout.note_list_view, parent, false);
+            view = inflater.inflate(R.layout.note_view, parent, false);
         }
 
-        Note itemData = notes.get(position);
+        Note note = noteList.get(position);
 
-//        ImageView image = view.findViewById(R.id.icon);
         TextView headerText = view.findViewById(R.id.header);
         TextView bodyText = view.findViewById(R.id.body);
-//        Button delBtn = view.findViewById(R.id.delbtn);
+        TextView deadlineText = view.findViewById(R.id.deadline);
+        TextView modifyDateText = view.findViewById(R.id.modifyDate);
+        CardView card = view.findViewById(R.id.card);
 
-        headerText.setText(itemData.getHeaderText());
-        bodyText.setText(itemData.getBodyText());
-//        delBtn.setTag(position);
-//        delBtn.setOnClickListener(delBtnListener);
+        headerText.setText(note.getHeaderText());
+        bodyText.setText(note.getBodyText());
+
+        int cardColor = R.color.colorCard;
+        if (note.isHasDeadLine()) {
+            deadlineText.setVisibility(View.VISIBLE);
+//            LocalDateTime date = LocalDateTime.ofEpochSecond(note.getDeadLineDate(), 0, ZoneOffset.ofHours(0));
+            LocalDateTime date = ThisApp.getDateOfEpoch(note.getEpochDeadLineDate());
+            deadlineText.setText(context.getString(R.string.deadline_string, ThisApp.getFormattedDate(date)));
+
+            long deltaEpochDate_inDays = note.getEpochDeadLineDate()/86400 - ThisApp.getEpochDate(LocalDateTime.now())/86400;
+
+            cardColor = R.color.colorCard;      //цвет по умолчанию
+            if (deltaEpochDate_inDays < 0) {
+                cardColor = R.color.colorExpiredCard;
+            }
+            switch ((int) deltaEpochDate_inDays) {
+                case -1:
+                    deadlineText.setText(context.getString(R.string.deadline_string, "вчера"));
+                    break;
+                case 0:
+                    cardColor = R.color.colorTodaysCard;
+                    deadlineText.setText(context.getString(R.string.deadline_string, "сегодня"));
+                    break;
+                case 1:
+                    deadlineText.setText(context.getString(R.string.deadline_string, "завтра"));
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            deadlineText.setVisibility(View.GONE);
+        }
+
+        if (headerText.getText().length() == 0) headerText.setVisibility(View.GONE);
+        else headerText.setVisibility(View.VISIBLE);
+        if (bodyText.getText().length() == 0) bodyText.setVisibility(View.GONE);
+        else bodyText.setVisibility(View.VISIBLE);
+
+//        card.setCardBackgroundColor(ColorStateList.valueOf(context.getResources().getColor(cardColor)));
+        card.setCardBackgroundColor(ContextCompat.getColor(context, cardColor));
+
+//        LocalDateTime time = LocalDateTime.ofEpochSecond(note.getModifyDate(), 0, ZoneOffset.ofHours(0));
+        LocalDateTime time = ThisApp.getDateOfEpoch(note.getEpochModifyDate());
+//        modifyDateText.setText(context.getString(R.string.modify_string, time.format(formatter)));
+        modifyDateText.setVisibility(View.GONE);
 
         return view;
     }

@@ -7,4 +7,6 @@
     <color name="colorSubtitle">#000000</color>
     <color name="fab_color">#D52222</color>
     <color name="colorCard">#29B6F6</color>
+    <color name="colorExpiredCard">#EF5350</color>
+    <color name="colorTodaysCard">#FFEE58</color>
 </resources>

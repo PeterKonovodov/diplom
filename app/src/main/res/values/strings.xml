@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">diplom</string>
+    <string name="default_header">Динозавры были покрыты перьями</string>
+    <string name="default_body">То, что многие динозавры были пернатыми, ученые заподозрили давно, тем более, что отпечатки перьев периодически попадались в местах раскопок.</string>
+    <string name="deadline_string">выполнить: %s</string>
+    <string name="modify_string">изменено: %s</string>
+
+
 </resources>

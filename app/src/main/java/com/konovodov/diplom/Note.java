@@ -1,22 +1,19 @@
 package com.konovodov.diplom;
 
-import java.time.*;
-
 public class Note {
 
     private String headerText;
     private String bodyText;
     private boolean hasDeadLine;
-    private LocalDateTime deadLineDate;
-    private LocalDateTime modifyDate;
+    private long EpochDeadLineDate;
+    private long EpochModifyDate;
 
-//    public Note(String headerText, String bodyText, boolean hasDeadLine, Date deadLineDate, Date modifyDate) {
-    public Note(String headerText, String bodyText, boolean hasDeadLine) {
+    public Note(String headerText, String bodyText, boolean hasDeadLine, long EpochDeadLineDate, long EpochModifyDate) {
         this.headerText = headerText;
         this.bodyText = bodyText;
         this.hasDeadLine = hasDeadLine;
-//        this.deadLineDate = deadLineDate;
-//        this.modifyDate = modifyDate;
+        this.EpochDeadLineDate = EpochDeadLineDate;
+        this.EpochModifyDate = EpochModifyDate;
     }
 
     public String getHeaderText() {
@@ -31,12 +28,12 @@ public class Note {
         return hasDeadLine;
     }
 
-    public LocalDateTime getDeadLineDate() {
-        return deadLineDate;
+    public long getEpochDeadLineDate() {
+        return EpochDeadLineDate;
     }
 
-    public LocalDateTime getModifyDate() {
-        return modifyDate;
+    public long getEpochModifyDate() {
+        return EpochModifyDate;
     }
 
     public void setHeaderText(String headerText) {
@@ -51,12 +48,12 @@ public class Note {
         this.hasDeadLine = hasDeadLine;
     }
 
-    public void setDeadLineDate(LocalDateTime deadLineDate) {
-        this.deadLineDate = deadLineDate;
+    public void setEpochDeadLineDate(long epochDeadLineDate) {
+        this.EpochDeadLineDate = epochDeadLineDate;
     }
 
-    public void setModifyDate(LocalDateTime modifyDate) {
-        this.modifyDate = modifyDate;
+    public void setEpochModifyDate(long epochModifyDate) {
+        this.EpochModifyDate = epochModifyDate;
     }
 
 }

@@ -9,9 +9,16 @@
     android:padding="8dp">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        card_view:cardCornerRadius="10dp"
+        card_view:cardElevation="2dp"
+        card_view:cardUseCompatPadding="true"
+        card_view:cardCornerRadius="2dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginEnd="5dp"
         card_view:cardBackgroundColor="@color/colorCard"
         >
 
@@ -25,12 +32,13 @@
                 android:id="@+id/header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="0dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 android:ellipsize="end"
                 style="@style/TextAppearance.AppCompat.Headline"
-                android:maxLines="2"
+                android:maxLines="1"
                 android:visibility="visible"
-                tools:text="Header text" />
+                tools:text="@string/default_header" />
 
 
             <TextView
@@ -38,30 +46,38 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 android:gravity="start"
                 style="@style/TextAppearance.AppCompat.Body1"
-                android:maxLines="3"
+                android:maxLines="2"
                 android:visibility="visible"
-                tools:text="Body text" />
+                android:text="@string/default_body" />
 
             <TextView
                 android:id="@+id/deadline"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
+                android:layout_marginEnd="10dp"
                 android:gravity="end"
                 style="@style/TextAppearance.AppCompat.Body1"
                 android:maxLines="3"
                 android:visibility="visible"
-                tools:text="10/10/10" />
+                tools:text="выполнить: 10/10/10" />
+
+            <TextView
+                android:id="@+id/modifyDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:gravity="end"
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:maxLines="3"
+                android:visibility="visible"
+                tools:text="изменено: 10/10/10" />
 
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
-
-
-
-
-
 
 </LinearLayout>
