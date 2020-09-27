@@ -15,8 +15,7 @@ import java.util.List;
 
 public class NotesAdapter extends BaseAdapter {
 
-    Context context;
-
+    private Context context;
     private LayoutInflater inflater;
     private List<Note> noteList;
 
@@ -29,6 +28,7 @@ public class NotesAdapter extends BaseAdapter {
             this.notes = new ArrayList<>();
         }
 */
+        ThisApp.sortNotes();
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -84,9 +84,8 @@ public class NotesAdapter extends BaseAdapter {
         bodyText.setText(note.getBodyText());
 
         int cardColor = R.color.colorCard;
-        if (note.isHasDeadLine()) {
+        if (note.hasDeadLine()) {
             deadlineText.setVisibility(View.VISIBLE);
-//            LocalDateTime date = LocalDateTime.ofEpochSecond(note.getDeadLineDate(), 0, ZoneOffset.ofHours(0));
             LocalDateTime date = ThisApp.getDateOfEpoch(note.getEpochDeadLineDate());
             deadlineText.setText(context.getString(R.string.deadline_string, ThisApp.getFormattedDate(date)));
 
@@ -122,11 +121,16 @@ public class NotesAdapter extends BaseAdapter {
 //        card.setCardBackgroundColor(ColorStateList.valueOf(context.getResources().getColor(cardColor)));
         card.setCardBackgroundColor(ContextCompat.getColor(context, cardColor));
 
-//        LocalDateTime time = LocalDateTime.ofEpochSecond(note.getModifyDate(), 0, ZoneOffset.ofHours(0));
         LocalDateTime time = ThisApp.getDateOfEpoch(note.getEpochModifyDate());
 //        modifyDateText.setText(context.getString(R.string.modify_string, time.format(formatter)));
         modifyDateText.setVisibility(View.GONE);
 
         return view;
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        ThisApp.sortNotes();
+        super.notifyDataSetChanged();
     }
 }

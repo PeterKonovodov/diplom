@@ -24,7 +24,7 @@ public class Note {
         return bodyText;
     }
 
-    public boolean isHasDeadLine() {
+    public boolean hasDeadLine() {
         return hasDeadLine;
     }
 

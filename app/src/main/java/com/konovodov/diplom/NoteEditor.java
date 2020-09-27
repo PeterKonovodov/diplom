@@ -59,7 +59,7 @@ public class NoteEditor {
             }
         });
 
-        if(note.isHasDeadLine()) {
+        if(note.hasDeadLine()) {
             hasDeadLineEdit.setChecked(true);
             deadlinePicker.setVisibility(View.VISIBLE);
         }

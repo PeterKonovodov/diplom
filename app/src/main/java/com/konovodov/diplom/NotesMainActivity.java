@@ -5,7 +5,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -41,7 +40,7 @@ public class NotesMainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         NoteEditor noteEditor = new NoteEditor(NotesMainActivity.this);
-        notes = ThisApp.getNotes();
+        notes = ThisApp.getNoteList();
         notesAdapter = new NotesAdapter(this, notes);
 
         button.setOnClickListener(new Button.OnClickListener(){
