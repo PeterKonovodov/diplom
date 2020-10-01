@@ -1,24 +1,30 @@
 package com.konovodov.diplom;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.time.*;
 import java.util.List;
-import java.util.Random;
 
 public class NotesMainActivity extends AppCompatActivity {
 
     private NotesAdapter notesAdapter;
-    private List<Note> notes;
+    private List<Note> noteList;
+    private Toolbar toolbar;
+    private PinManager pinManager;
+    private View notesListViewScreen;
+    private View getKeyScreen;
 
 
     public NotesMainActivity() {
@@ -28,44 +34,140 @@ public class NotesMainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("");
+        initNotesListView();
+        pinManager = new PinManager(this);
+
+        if(pinManager.hasPin()) {
+            //при наличии пин-кода скрываем список и открываем запрос пина
+            ((TextView)findViewById(R.id.get_key_screen_header)).setText(getString(R.string.enter_pin));
+            notesListViewScreen.setVisibility(View.INVISIBLE);
+            getKeyScreen.setVisibility(View.VISIBLE);
+            //заряжаем коллбэк на сравнение по завершению ввода
+            pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
+                @Override
+                public void doThis() {
+                    if(pinManager.checkPin(pinManager.getEnteredPin())) {
+                        Toast.makeText(NotesMainActivity.this, getString(R.string.pin_correct), Toast.LENGTH_SHORT).show();
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            public void run() {
+                                notesListViewScreen.setVisibility(View.VISIBLE);
+                                getKeyScreen.setVisibility(View.INVISIBLE);
+                            }
+                        }, 2000); //specify the number of milliseconds
+                    }
+                }
+            });
+        }
+        else {
+            notesListViewScreen.setVisibility(View.VISIBLE);
+            getKeyScreen.setVisibility(View.INVISIBLE);
+        }
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+
+        if (id == R.id.action_set_new_pin) {
+            ((TextView)findViewById(R.id.get_key_screen_header)).setText(getString(R.string.enter_new_pin));
+            notesListViewScreen.setVisibility(View.INVISIBLE);
+            getKeyScreen.setVisibility(View.VISIBLE);
+            pinManager.clearEnteredPin();
+            //заряжаем коллбэк на получение и сохранение нового пинкода
+            pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
+                @Override
+                public void doThis() {
+                    Toast.makeText(NotesMainActivity.this, getString(R.string.pin_set), Toast.LENGTH_SHORT).show();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            notesListViewScreen.setVisibility(View.VISIBLE);
+                            getKeyScreen.setVisibility(View.INVISIBLE);
+                            pinManager.saveNew(pinManager.getEnteredPin());
+                        }
+                    }, 2000); //specify the number of milliseconds
+                }
+            });
+            return true;
+        }
+
+        if (id == R.id.action_reset_pin) {
+            if(!pinManager.hasPin()) {
+                Toast.makeText(NotesMainActivity.this, getString(R.string.pin_not_exist), Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            //при наличии пин-кода скрываем список и открываем запрос пина
+            ((TextView)findViewById(R.id.get_key_screen_header)).setText(getString(R.string.pin_confirm_to_delete));
+
+            notesListViewScreen.setVisibility(View.INVISIBLE);
+            getKeyScreen.setVisibility(View.VISIBLE);
+            pinManager.clearEnteredPin();
+            //заряжаем коллбэк на сравнение по завершению ввода
+            pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
+                @Override
+                public void doThis() {
+                    if(pinManager.checkPin(pinManager.getEnteredPin())) {
+                        Toast.makeText(NotesMainActivity.this, getString(R.string.pin_deleted), Toast.LENGTH_SHORT).show();
+                        pinManager.clearPin();
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            public void run() {
+                                notesListViewScreen.setVisibility(View.VISIBLE);
+                                getKeyScreen.setVisibility(View.INVISIBLE);
+                            }
+                        }, 2000); //specify the number of milliseconds
+                    }
+                }
+            });
+            return true;
+        }
+
+        if (id == R.id.action_select_color_theme) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+    public void initNotesListView() {
+
         FloatingActionButton fab = findViewById(R.id.fab);
         ListView notesListView = findViewById(R.id.notesListView);
-        View notesListViewScreen = findViewById(R.id.notesListViewScreen);
-        View getKeyScreen = findViewById(R.id.get_key_screen);
-        Button button = findViewById(R.id.button);
+
+        notesListViewScreen = findViewById(R.id.notesListViewScreen);
+        getKeyScreen = findViewById(R.id.get_key_screen);
 
         setSupportActionBar(toolbar);
 
         NoteEditor noteEditor = new NoteEditor(NotesMainActivity.this);
-        notes = ThisApp.getNoteList();
-        notesAdapter = new NotesAdapter(this, notes);
+        noteList = ThisApp.getNoteRepository().getNotes();
+        notesAdapter = new NotesAdapter(this, noteList);
 
-        button.setOnClickListener(new Button.OnClickListener(){
 
-            @Override
-            public void onClick(View view) {
-//                getKeyScreen.setVisibility(View.INVISIBLE);
-//                noteEditScreen.setVisibility(View.VISIBLE);
 
-            }
-        });
+
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                noteEditor.editNote(notesAdapter, notes.size());
-//                generateRandomItemData();
-
+                noteEditor.editNote(notesAdapter, noteList.size());
             }
         });
 
         notesListView.setAdapter(notesAdapter);
-
-        generateLoadedItemData();
-
 
         notesListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -76,8 +178,10 @@ public class NotesMainActivity extends AppCompatActivity {
                 return true;
             }
         });
-
     }
+
+
+}
 
 /*
     @Override
@@ -87,16 +191,3 @@ public class NotesMainActivity extends AppCompatActivity {
 */
 
 
-
-    private void generateRandomItemData() {
-        Random r = new Random();
-        Random r1 = new Random();
-        notesAdapter.addNote(new Note(getString(R.string.default_header), getString(R.string.default_body), true, LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(0)) + 86400*(r.nextInt(3) - 1), LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(0))));
-    }
-
-    private void generateLoadedItemData() {
-
-    }
-
-
-}

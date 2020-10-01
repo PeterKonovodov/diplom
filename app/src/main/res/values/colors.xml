@@ -5,8 +5,12 @@
     <color name="colorAccent">#03DAC5</color>
     <color name="colorTitle">#000000</color>
     <color name="colorSubtitle">#000000</color>
-    <color name="fab_color">#D52222</color>
-    <color name="colorCard">#29B6F6</color>
-    <color name="colorExpiredCard">#EF5350</color>
-    <color name="colorTodaysCard">#FFEE58</color>
+    <color name="fab_color">#81C784</color>
+    <color name="colorCard">#80D8FF</color>
+    <color name="colorExpiredCard">#FF9E80</color>
+    <color name="colorTodaysCard">#FFECB3</color>
+    <color name="colorDoneCard">#C8C8C8</color>
+    <color name="colorPinDigitYellow">#FFCA28</color>
+    <color name="colorPinDigitGray">#9CA0A1</color>
+    <color name="colorPinKeyBackground">#FFFFFF</color>
 </resources>

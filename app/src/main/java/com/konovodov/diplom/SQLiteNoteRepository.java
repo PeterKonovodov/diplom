@@ -1,34 +1,44 @@
 package com.konovodov.diplom;
 
-import android.app.Activity;
-import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 
+import com.konovodov.diplom.comparators.DeadLineComparator;
+import com.konovodov.diplom.comparators.HasDeadLineComparator;
+import com.konovodov.diplom.comparators.IsDoneComparator;
+import com.konovodov.diplom.comparators.ModifyDateComparator;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SQLiteNoteRepository implements NoteRepository {
 
-    final String LOG_TAG = "SQLiteRep";
-    Context context;
-    DBHelper dbHelper;
+    private final String LOG_TAG = "SQLiteRep";
+    private final String TABLE_NAME = "Notes_Table";
+    private DBHelper dbHelper;
+    private List<Note> noteList;
+
+    private static final HasDeadLineComparator hasDeadLineComparator = new HasDeadLineComparator();
+    private static final DeadLineComparator deadLineComparator = new DeadLineComparator();
+    private static final ModifyDateComparator modifyDateComparator = new ModifyDateComparator();
+    private static final IsDoneComparator isDoneComparator = new IsDoneComparator();
+
 
     // создаем объект для данных
     ContentValues cv = new ContentValues();
 
 
     public SQLiteNoteRepository(Context context) {
-        this.context = context;
-
         // создаем объект для создания и управления версиями БД
         dbHelper = new DBHelper(context);
-
-
-
+        noteList = new ArrayList<>();
+        loadNotes();
     }
 
     class DBHelper extends SQLiteOpenHelper {
@@ -42,10 +52,14 @@ public class SQLiteNoteRepository implements NoteRepository {
         public void onCreate(SQLiteDatabase db) {
             Log.d(LOG_TAG, "--- onCreate database ---");
             // создаем таблицу с полями
-            db.execSQL("create table mytable ("
+            db.execSQL("create table " + TABLE_NAME + " ("
                     + "id integer primary key autoincrement,"
-                    + "name text,"
-                    + "email text" + ");");
+                    + "header text,"
+                    + "body text,"
+                    + "hasDeadLine integer,"
+                    + "epochDeadLineDate integer,"
+                    + "epochModifyDate integer,"
+                    + "isCompleted integer" + ");");
         }
 
         @Override
@@ -56,40 +70,111 @@ public class SQLiteNoteRepository implements NoteRepository {
 
 
     @Override
-    public Note getNoteById(String id) {
+    public Note getNoteById(long id) {
         return null;
     }
 
     @Override
     public List<Note> getNotes() {
-        return null;
+        return noteList;
     }
+
+    private void loadNotes() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        Log.d(LOG_TAG, "--- Rows in table: ---");
+        // делаем запрос всех данных из таблицы mytable, получаем Cursor
+        Cursor c = db.query(TABLE_NAME, null, null, null, null, null, null);
+
+        // ставим позицию курсора на первую строку выборки
+        // если в выборке нет строк, вернется false
+        if (c.moveToFirst()) {
+
+            // определяем номера столбцов по имени в выборке
+            int idColIndex = c.getColumnIndex("id");
+            int headerColIndex = c.getColumnIndex("header");
+            int bodyColIndex = c.getColumnIndex("body");
+            int hasDeadLineIndex = c.getColumnIndex("hasDeadLine");
+            int epochDeadLineDateIndex = c.getColumnIndex("epochDeadLineDate");
+            int epochModifyDateIndex = c.getColumnIndex("epochModifyDate");
+            int isCompletedIndex = c.getColumnIndex("isCompleted");
+
+            do {
+                // получаем значения по номерам столбцов и пишем все в лог
+                Note note = new Note(c.getInt(idColIndex), c.getString(headerColIndex),
+                        c.getString(bodyColIndex), intToBoolean(c.getInt(hasDeadLineIndex)),
+                        c.getInt(epochDeadLineDateIndex), c.getInt(epochModifyDateIndex),
+                        intToBoolean(c.getInt(isCompletedIndex)));
+
+                noteList.add(note);
+                Log.d(LOG_TAG,
+                        "ID = " + c.getInt(idColIndex) +
+                                ", header = " + c.getString(headerColIndex) +
+                                ", body = " + c.getString(bodyColIndex) +
+                                ", hasDeadLine = " + c.getInt(hasDeadLineIndex) +
+                                ", epochDeadLineDate = " + c.getInt(epochDeadLineDateIndex) +
+                                ", epochModifyDate = " + c.getInt(epochModifyDateIndex) +
+                                ", isCompleted = " + c.getInt(isCompletedIndex));
+                // переход на следующую строку
+                // а если следующей нет (текущая - последняя), то false - выходим из цикла
+            } while (c.moveToNext());
+        } else
+            Log.d(LOG_TAG, "0 rows");
+        c.close();
+        dbHelper.close();
+    }
+
 
     @Override
     public void saveNote(Note note) {
-        // получаем данные из полей ввода
-        String name = "nname";
-        String email = "eemail";
-
         // подключаемся к БД
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        Log.d(LOG_TAG, "--- Insert in mytable: ---");
+        Log.d(LOG_TAG, "--- Insert in TABLE_NAME: ---");
         // подготовим данные для вставки в виде пар: наименование столбца - значение
 
-        cv.put("name", name);
-        cv.put("email", email);
-        // вставляем запись и получаем ее ID
-        long rowID = db.insert("mytable", null, cv);
-        Log.d(LOG_TAG, "row inserted, ID = " + rowID);
+        cv.put("header", note.getHeaderText());
+        cv.put("body", note.getBodyText());
+        cv.put("hasDeadLine", booleanToInt(note.hasDeadLine()));
+        cv.put("epochDeadLineDate", note.getEpochDeadLineDate());
+        cv.put("epochModifyDate", note.getEpochModifyDate());
+        cv.put("isCompleted", booleanToInt(note.isCompleted()));
 
-        // закрываем подключение к БД
+        if (note.getId() == 0) {     //если id=0, то это новая запись
+            // вставляем запись и получаем ее ID
+            note.setId(db.insert(TABLE_NAME, null, cv));
+            Log.d(LOG_TAG, "row inserted, ID = " + note.getId());
+        } else {
+            // если id != 0, то обновляем по id
+            int updCount = db.update(TABLE_NAME, cv, "id = ?",
+                    new String[]{"" + note.getId()});
+            Log.d(LOG_TAG, "updated rows count = " + updCount);
+        }
         dbHelper.close();
-
     }
 
-    @Override
-    public void deleteById(String id) {
 
+    @Override
+    public void deleteById(long id) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        int delCount = db.delete(TABLE_NAME, "id = " + id, null);
+        Log.d(LOG_TAG, "deleted rows count = " + delCount);
+        dbHelper.close();
+    }
+
+
+    public void sortNotes() {
+        Collections.sort(getNotes(), isDoneComparator.thenComparing(hasDeadLineComparator).thenComparing(deadLineComparator).thenComparing(modifyDateComparator));
+    }
+
+
+    private int booleanToInt(boolean in) {
+        if (in) return 1;
+        return 0;
+    }
+
+    private boolean intToBoolean(int in) {
+        if (in == 0) return false;
+        return true;
     }
 }

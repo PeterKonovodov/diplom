@@ -1,0 +1,46 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group
+        android:id="@+id/gr">
+    <item
+        android:id="@+id/action_set_english"
+        android:orderInCategory="100"
+        android:title="@string/set_english"
+        app:showAsAction="never"
+        android:icon="@drawable/padcircle"
+        android:checkable="true"
+        android:checked="false"
+        />
+
+    <item
+        android:id="@+id/action_set_russian"
+        android:orderInCategory="100"
+        android:title="@string/set_russian"
+        app:showAsAction="never"
+        android:checkable="true"
+        android:checked="true"
+        />
+
+        </group>
+
+
+    <item
+        android:id="@+id/action_set_new_pin"
+        android:orderInCategory="100"
+        android:title="@string/set_new_pin"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_reset_pin"
+        android:orderInCategory="100"
+        android:title="@string/reset_pin"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_select_color_theme"
+        android:orderInCategory="100"
+        android:title="@string/select_color_theme"
+        app:showAsAction="never" />
+
+</menu>

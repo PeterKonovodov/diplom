@@ -1,7 +1,8 @@
 package com.konovodov.diplom;
 
-public interface Keystore {
+public interface PinStore {
     boolean hasPin();
     boolean checkPin(String pin);
     void saveNew(String pin);
+    void clearPin();
 }

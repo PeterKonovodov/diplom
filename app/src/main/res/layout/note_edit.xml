@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardlook"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        card_view:cardElevation="5dp"
-        card_view:cardUseCompatPadding="true"
-        card_view:cardCornerRadius="5dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginBottom="5dp"
-        android:layout_marginEnd="5dp"
         android:layout_gravity="top"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="5dp"
         card_view:cardBackgroundColor="@color/colorCard"
-        >
+        card_view:cardCornerRadius="5dp"
+        card_view:cardElevation="5dp"
+        card_view:cardUseCompatPadding="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -28,55 +27,63 @@
 
             <EditText
                 android:id="@+id/headerEdit"
+                style="@style/TextAppearance.AppCompat.Display1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:ellipsize="none"
-                style="@style/TextAppearance.AppCompat.Display1"
-                android:visibility="visible"
-                android:text="" />
+                android:text=""
+                android:visibility="visible" />
 
 
             <EditText
                 android:id="@+id/bodyEdit"
+                style="@style/TextAppearance.AppCompat.Large"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="none"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
+                android:ellipsize="none"
                 android:gravity="start"
-                style="@style/TextAppearance.AppCompat.Large"
-                android:visibility="visible"
-                android:text="" />
+                android:text=""
+                android:visibility="visible" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <CheckBox
-                android:id="@+id/hasdeadlineEdit"
-                android:layout_gravity="end"
-                android:layout_marginEnd="20dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/TextAppearance.AppCompat.Large.Inverse"
-                android:text="Has deadline"
-                />
+                <CheckBox
+                    android:id="@+id/hasdeadlineEdit"
+                    style="@style/TextAppearance.AppCompat.Large.Inverse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:layout_marginStart="10dp"
+                    android:text="Has deadline" />
+
+                <CheckBox
+                    android:id="@+id/isDoneEdit"
+                    style="@style/TextAppearance.AppCompat.Large.Inverse"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_marginStart="40dp"
+                    android:text="Completed" />
+
+            </LinearLayout>
 
             <DatePicker
                 android:id="@+id/deadLinePicker"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:datePickerMode="spinner"
-                android:calendarViewShown="false"
                 android:layout_gravity="center_horizontal"
-                />
+                android:calendarViewShown="false"
+                android:datePickerMode="spinner" />
 
         </LinearLayout>
 
 
-
     </androidx.cardview.widget.CardView>
-
-
 
 
 </LinearLayout>

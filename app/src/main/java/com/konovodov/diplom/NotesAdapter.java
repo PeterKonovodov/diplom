@@ -13,6 +13,8 @@ import androidx.core.content.ContextCompat;
 import java.time.*;
 import java.util.List;
 
+import static com.konovodov.diplom.ThisApp.SECONDS_PER_DAY;
+
 public class NotesAdapter extends BaseAdapter {
 
     private Context context;
@@ -23,12 +25,7 @@ public class NotesAdapter extends BaseAdapter {
     public NotesAdapter(Context context, List<Note> noteList) {
         this.context = context;
         this.noteList = noteList;
-/*
-        if (this.notes == null) {
-            this.notes = new ArrayList<>();
-        }
-*/
-        ThisApp.sortNotes();
+        ThisApp.getNoteRepository().sortNotes();
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -89,12 +86,17 @@ public class NotesAdapter extends BaseAdapter {
             LocalDateTime date = ThisApp.getDateOfEpoch(note.getEpochDeadLineDate());
             deadlineText.setText(context.getString(R.string.deadline_string, ThisApp.getFormattedDate(date)));
 
-            long deltaEpochDate_inDays = note.getEpochDeadLineDate()/86400 - ThisApp.getEpochDate(LocalDateTime.now())/86400;
+            long currentEpochDate = ThisApp.getEpochDateNowTruncDays();
+            long epochDeadLineDate = note.getEpochDeadLineDate();
+
+//            long deltaEpochDate_inDays = (epochDeadLineDate / SECONDS_PER_DAY) - (currentEpochDate / SECONDS_PER_DAY);
+            long deltaEpochDate_inDays = (epochDeadLineDate - currentEpochDate) / SECONDS_PER_DAY;
 
             cardColor = R.color.colorCard;      //цвет по умолчанию
             if (deltaEpochDate_inDays < 0) {
                 cardColor = R.color.colorExpiredCard;
             }
+
             switch ((int) deltaEpochDate_inDays) {
                 case -1:
                     deadlineText.setText(context.getString(R.string.deadline_string, "вчера"));
@@ -109,8 +111,21 @@ public class NotesAdapter extends BaseAdapter {
                 default:
                     break;
             }
+
         } else {
             deadlineText.setVisibility(View.GONE);
+        }
+
+        if(note.isCompleted()) {
+            deadlineText.setText("выполнено");
+            deadlineText.setVisibility(View.VISIBLE);
+            cardColor = R.color.colorDoneCard;
+
+//            headerText.setPaintFlags(headerText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+//            bodyText.setPaintFlags(bodyText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        } else {
+//            headerText.setPaintFlags(headerText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+//            bodyText.setPaintFlags(bodyText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
 
         if (headerText.getText().length() == 0) headerText.setVisibility(View.GONE);
@@ -130,7 +145,7 @@ public class NotesAdapter extends BaseAdapter {
 
     @Override
     public void notifyDataSetChanged() {
-        ThisApp.sortNotes();
+        ThisApp.getNoteRepository().sortNotes();
         super.notifyDataSetChanged();
     }
 }

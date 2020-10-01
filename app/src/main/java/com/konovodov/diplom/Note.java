@@ -5,15 +5,19 @@ public class Note {
     private String headerText;
     private String bodyText;
     private boolean hasDeadLine;
-    private long EpochDeadLineDate;
-    private long EpochModifyDate;
+    private long epochDeadLineDate;
+    private long epochModifyDate;
+    private boolean isCompleted;
+    private long id;
 
-    public Note(String headerText, String bodyText, boolean hasDeadLine, long EpochDeadLineDate, long EpochModifyDate) {
+    public Note(long id, String headerText, String bodyText, boolean hasDeadLine, long EpochDeadLineDate, long EpochModifyDate, boolean isCompleted) {
+        this.id = id;
         this.headerText = headerText;
         this.bodyText = bodyText;
         this.hasDeadLine = hasDeadLine;
-        this.EpochDeadLineDate = EpochDeadLineDate;
-        this.EpochModifyDate = EpochModifyDate;
+        this.epochDeadLineDate = EpochDeadLineDate;
+        this.epochModifyDate = EpochModifyDate;
+        this.isCompleted = isCompleted;
     }
 
     public String getHeaderText() {
@@ -29,11 +33,11 @@ public class Note {
     }
 
     public long getEpochDeadLineDate() {
-        return EpochDeadLineDate;
+        return epochDeadLineDate;
     }
 
     public long getEpochModifyDate() {
-        return EpochModifyDate;
+        return epochModifyDate;
     }
 
     public void setHeaderText(String headerText) {
@@ -49,11 +53,26 @@ public class Note {
     }
 
     public void setEpochDeadLineDate(long epochDeadLineDate) {
-        this.EpochDeadLineDate = epochDeadLineDate;
+        this.epochDeadLineDate = epochDeadLineDate;
     }
 
     public void setEpochModifyDate(long epochModifyDate) {
-        this.EpochModifyDate = epochModifyDate;
+        this.epochModifyDate = epochModifyDate;
     }
 
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setCompleted(boolean completed) {
+        isCompleted = completed;
+    }
 }

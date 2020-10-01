@@ -1,20 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorPinKeyBackground">
 
-    <Button
-        android:id="@+id/button"
+    <TextView
+        android:id="@+id/get_key_screen_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="120dp"
+        android:gravity="center"
+        android:text="Введите PIN"/>
+
+    <LinearLayout
+        android:layout_marginTop="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/padDigit1"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="2"
+            android:foreground="@drawable/padcircle"
+            android:foregroundTint="#9CA0A1"/>
+
+        <View
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="1" />
+
+        <View
+            android:id="@+id/padDigit2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="2"
+            android:foreground="@drawable/padcircle"
+            android:foregroundTint="#9CA0A1"/>
+
+        <View
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="2" />
+
+        <View
+            android:id="@+id/padDigit3"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="2"
+            android:foreground="@drawable/padcircle"
+            android:foregroundTint="#9CA0A1"/>
+
+        <View
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="2" />
+
+        <View
+            android:id="@+id/padDigit4"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="2"
+            android:foreground="@drawable/padcircle"
+            android:foregroundTint="#9CA0A1"
+            />
+
+    </LinearLayout>
+
+
+    <include
+        layout="@layout/pin_pad"
+        android:layout_marginTop="50dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="144dp"
-        android:layout_marginTop="292dp"
-        android:text="Button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_gravity="center"
+        />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
