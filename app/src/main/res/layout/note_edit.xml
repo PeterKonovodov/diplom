@@ -6,14 +6,11 @@
     android:layout_height="match_parent">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardlook"
+        android:id="@+id/cardEdit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_margin="5dp"
         card_view:cardBackgroundColor="@color/colorCard"
         card_view:cardCornerRadius="5dp"
         card_view:cardElevation="5dp"
@@ -27,27 +24,15 @@
 
             <EditText
                 android:id="@+id/headerEdit"
-                style="@style/TextAppearance.AppCompat.Display1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:ellipsize="none"
+                style="@style/AppTheme.HeaderEdit"
                 android:text=""
-                android:visibility="visible" />
+/>
 
 
             <EditText
                 android:id="@+id/bodyEdit"
-                style="@style/TextAppearance.AppCompat.Large"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:ellipsize="none"
-                android:gravity="start"
-                android:text=""
-                android:visibility="visible" />
+                style="@style/AppTheme.BodyEdit"
+/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -55,20 +40,20 @@
 
                 <CheckBox
                     android:id="@+id/hasdeadlineEdit"
-                    style="@style/TextAppearance.AppCompat.Large.Inverse"
+                    style="@style/AppTheme.BodyEdit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="start"
                     android:layout_marginStart="10dp"
-                    android:text="Has deadline" />
+                    android:text="@string/deadline_string" />
 
                 <CheckBox
                     android:id="@+id/isDoneEdit"
-                    style="@style/TextAppearance.AppCompat.Large.Inverse"
+                    style="@style/AppTheme.BodyEdit"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:layout_marginStart="40dp"
-                    android:text="Completed" />
+                    android:text="@string/completed_string" />
 
             </LinearLayout>
 

@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
-<ListView android:id="@+id/notesListView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginBottom="20dp"
-    tools:context=".NotesMainActivity"
-    tools:listitem="@layout/note_view"
-    tools:showIn="@layout/notes_list_view" />
+    <ListView
+        android:id="@+id/notesListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="20dp"
+        tools:context=".NotesMainActivity"
+        tools:listitem="@layout/note_view"
+        tools:showIn="@layout/notes_list_view" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:backgroundTint="@color/fab_color"
-        android:tint="@color/colorTitle"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        android:foreground="@android:drawable/ic_menu_add"
+        />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

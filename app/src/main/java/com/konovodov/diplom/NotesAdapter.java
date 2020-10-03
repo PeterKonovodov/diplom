@@ -68,6 +68,12 @@ public class NotesAdapter extends BaseAdapter {
         if (view == null) {
             view = inflater.inflate(R.layout.note_view, parent, false);
         }
+/*
+        if(position == 0) {
+            View notesListViewScreen = view.findViewById(R.id.notesListViewScreen);
+            notesListViewScreen.setLayoutParams();
+        }
+*/
 
         Note note = noteList.get(position);
 
@@ -84,7 +90,7 @@ public class NotesAdapter extends BaseAdapter {
         if (note.hasDeadLine()) {
             deadlineText.setVisibility(View.VISIBLE);
             LocalDateTime date = ThisApp.getDateOfEpoch(note.getEpochDeadLineDate());
-            deadlineText.setText(context.getString(R.string.deadline_string, ThisApp.getFormattedDate(date)));
+            deadlineText.setText(context.getString(R.string.deadline_string_formatted, ThisApp.getFormattedDate(date)));
 
             long currentEpochDate = ThisApp.getEpochDateNowTruncDays();
             long epochDeadLineDate = note.getEpochDeadLineDate();
@@ -99,14 +105,14 @@ public class NotesAdapter extends BaseAdapter {
 
             switch ((int) deltaEpochDate_inDays) {
                 case -1:
-                    deadlineText.setText(context.getString(R.string.deadline_string, "вчера"));
+                    deadlineText.setText(context.getString(R.string.deadline_string_formatted, "вчера"));
                     break;
                 case 0:
                     cardColor = R.color.colorTodaysCard;
-                    deadlineText.setText(context.getString(R.string.deadline_string, "сегодня"));
+                    deadlineText.setText(context.getString(R.string.deadline_string_formatted, "сегодня"));
                     break;
                 case 1:
-                    deadlineText.setText(context.getString(R.string.deadline_string, "завтра"));
+                    deadlineText.setText(context.getString(R.string.deadline_string_formatted, "завтра"));
                     break;
                 default:
                     break;

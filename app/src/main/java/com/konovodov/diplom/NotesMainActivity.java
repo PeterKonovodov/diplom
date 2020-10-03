@@ -36,43 +36,67 @@ public class NotesMainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("");
         initNotesListView();
         pinManager = new PinManager(this);
 
-        if(pinManager.hasPin()) {
-            //при наличии пин-кода скрываем список и открываем запрос пина
-            ((TextView)findViewById(R.id.get_key_screen_header)).setText(getString(R.string.enter_pin));
-            notesListViewScreen.setVisibility(View.INVISIBLE);
-            getKeyScreen.setVisibility(View.VISIBLE);
-            //заряжаем коллбэк на сравнение по завершению ввода
-            pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
-                @Override
-                public void doThis() {
-                    if(pinManager.checkPin(pinManager.getEnteredPin())) {
-                        Toast.makeText(NotesMainActivity.this, getString(R.string.pin_correct), Toast.LENGTH_SHORT).show();
-                        Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            public void run() {
-                                notesListViewScreen.setVisibility(View.VISIBLE);
-                                getKeyScreen.setVisibility(View.INVISIBLE);
-                            }
-                        }, 2000); //specify the number of milliseconds
-                    }
-                }
-            });
-        }
-        else {
-            notesListViewScreen.setVisibility(View.VISIBLE);
-            getKeyScreen.setVisibility(View.INVISIBLE);
-        }
 
     }
+
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        if(ThisApp.isColdAppStart()) {
+            ThisApp.setColdAppStart(false);
+
+            if(pinManager.hasPin()) {
+                //при наличии пин-кода скрываем список и открываем запрос пина
+                ((TextView)findViewById(R.id.get_key_screen_header)).setText(getString(R.string.enter_pin));
+
+                //скрываем из меню возможность установки нового пина при первичном запросе
+                MenuItem menuSetPinItem = toolbar.getMenu().findItem(R.id.action_set_new_pin);
+                menuSetPinItem.setVisible(false);
+
+                notesListViewScreen.setVisibility(View.INVISIBLE);
+                getKeyScreen.setVisibility(View.VISIBLE);
+
+
+                //заряжаем коллбэк на сравнение по завершению ввода
+                pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
+                    @Override
+                    public void doThis() {
+                        if(pinManager.checkPin(pinManager.getEnteredPin())) {
+                            Toast.makeText(NotesMainActivity.this, getString(R.string.pin_confirmed), Toast.LENGTH_SHORT).show();
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                public void run() {
+                                    notesListViewScreen.setVisibility(View.VISIBLE);
+                                    getKeyScreen.setVisibility(View.INVISIBLE);
+                                    menuSetPinItem.setVisible(true);
+
+                                }
+                            }, 2000); //specify the number of milliseconds
+                        }
+                    }
+                });
+            }
+            else {
+                notesListViewScreen.setVisibility(View.VISIBLE);
+                getKeyScreen.setVisibility(View.INVISIBLE);
+            }
+        } else {
+            notesListViewScreen.setVisibility(View.VISIBLE);
+            getKeyScreen.setVisibility(View.INVISIBLE);
+        }
+
+
+
+
         return true;
     }
 
@@ -86,7 +110,11 @@ public class NotesMainActivity extends AppCompatActivity {
             notesListViewScreen.setVisibility(View.INVISIBLE);
             getKeyScreen.setVisibility(View.VISIBLE);
             pinManager.clearEnteredPin();
+
+            //
+            item.setVisible(false);
             //заряжаем коллбэк на получение и сохранение нового пинкода
+
             pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
                 @Override
                 public void doThis() {
@@ -97,6 +125,8 @@ public class NotesMainActivity extends AppCompatActivity {
                             notesListViewScreen.setVisibility(View.VISIBLE);
                             getKeyScreen.setVisibility(View.INVISIBLE);
                             pinManager.saveNew(pinManager.getEnteredPin());
+                            item.setVisible(true);            //заряжаем коллбэк на получение и сохранение нового пинкода
+
                         }
                     }, 2000); //specify the number of milliseconds
                 }
@@ -135,9 +165,6 @@ public class NotesMainActivity extends AppCompatActivity {
             return true;
         }
 
-        if (id == R.id.action_select_color_theme) {
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -145,6 +172,7 @@ public class NotesMainActivity extends AppCompatActivity {
     public void initNotesListView() {
 
         FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setAlpha(0.5f);
         ListView notesListView = findViewById(R.id.notesListView);
 
         notesListViewScreen = findViewById(R.id.notesListViewScreen);

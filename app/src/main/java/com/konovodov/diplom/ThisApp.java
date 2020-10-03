@@ -24,7 +24,7 @@ public class ThisApp extends Application {
     private static ZoneOffset zoneOffset;
 
     public static final int SECONDS_PER_DAY = 86400;
-
+    private static boolean coldAppStart = false;
 
 
 
@@ -37,6 +37,7 @@ public class ThisApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        coldAppStart = true;
         Log.i("tag", "ThisApp onCreate");
         noteRepository = new SQLiteNoteRepository(this);
         pinStore = new SharedPrefPinStore(this);
@@ -97,5 +98,13 @@ public class ThisApp extends Application {
 
     public static PinStore getPinStore() {
         return pinStore;
+    }
+
+    public static boolean isColdAppStart() {
+        return coldAppStart;
+    }
+
+    public static void setColdAppStart(boolean coldAppStart) {
+        ThisApp.coldAppStart = coldAppStart;
     }
 }
