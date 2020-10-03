@@ -42,7 +42,7 @@
             style="@style/AppTheme.Body"
             android:gravity="end"
             android:visibility="gone"
-            tools:text="изменено: 10/10/10" />
+            tools:text="" />
 
     </LinearLayout>
 

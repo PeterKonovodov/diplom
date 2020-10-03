@@ -70,7 +70,7 @@
     <style name="AppTheme.BodyEdit" parent = "TextAppearance.AppCompat.Large">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:inputType">text</item>
+        <item name="android:inputType">none</item>
         <item name="android:layout_marginStart">10dp</item>
         <item name="android:layout_marginEnd">10dp</item>
         <item name="android:ellipsize">none</item>
