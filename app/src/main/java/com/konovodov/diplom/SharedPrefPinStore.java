@@ -12,8 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class SharedPrefPinStore implements PinStore {
 
 
-    private Context context;
-    private SharedPreferences sharedPreferences;
+    private final SharedPreferences sharedPreferences;
     private static final byte[] cipherKey = "38ipJ1zWkgckJjel".getBytes();
     private Key aesKey;
     private Cipher cipher;
@@ -21,7 +20,6 @@ public class SharedPrefPinStore implements PinStore {
 
 
     public SharedPrefPinStore(Context context) {
-        this.context = context;
         sharedPreferences = context.getSharedPreferences("pinstore", Context.MODE_PRIVATE);
 
         try {
@@ -53,7 +51,7 @@ public class SharedPrefPinStore implements PinStore {
             if (appPin == null) return false;
 
             //вставить попытку дешифровки
-            if (pin.equals(appPin)) return true;
+            return pin.equals(appPin);
         }
         return false;
     }

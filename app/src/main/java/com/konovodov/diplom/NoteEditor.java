@@ -17,7 +17,7 @@ import java.util.List;
 
 public class NoteEditor implements NoteRepository {
 
-    private Context context;
+    private final Context context;
     private boolean thisIsNewNote;
     private List<Note> noteList;
     private Note note;
@@ -34,7 +34,8 @@ public class NoteEditor implements NoteRepository {
         noteList = getNotes();
         if (position >= noteList.size()) {
             thisIsNewNote = true;
-            note = new Note(0, "", "", false, ThisApp.getEpochDateNowTruncDays(), 0, false);
+            note = new Note(0, "", "", false,
+                    ThisApp.getEpochDateNowTruncDays(), 0, false);
         } else note = noteList.get(position);
 
 
@@ -55,15 +56,19 @@ public class NoteEditor implements NoteRepository {
         isDoneEdit.setChecked(note.isCompleted());
 
 
-        deadlinePicker.init(deadLineDate.getYear(), deadLineDate.getMonthValue() - 1, deadLineDate.getDayOfMonth(), new DatePicker.OnDateChangedListener() {
+        deadlinePicker.init(deadLineDate.getYear(), deadLineDate.getMonthValue() - 1,
+                deadLineDate.getDayOfMonth(), new DatePicker.OnDateChangedListener() {
             @Override
             public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                 try {
-                    deadLineDate = deadLineDate.withYear(year).withMonth(monthOfYear + 1).withDayOfMonth(dayOfMonth);
+                    deadLineDate = deadLineDate.withYear(year).withMonth(monthOfYear + 1)
+                            .withDayOfMonth(dayOfMonth);
                     EpochDeadLineDate = ThisApp.getEpochDate(deadLineDate);
-                    note.setCompleted(false);    //при манипуляциях с датой флаг выполненности сбрасывается
+                    note.setCompleted(false);    //при манипуляциях с датой флаг
+                    // выполненности сбрасывается
                     isDoneEdit.setChecked(false);
                 } catch (DateTimeException e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -98,10 +103,11 @@ public class NoteEditor implements NoteRepository {
 
         mDialogBuilder
                 .setCancelable(false)
-                .setPositiveButton("OK",
+                .setPositiveButton(context.getString(R.string.ok_string),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                if (headerEdit.getText().length() == 0 && bodyEdit.getText().length() == 0) {
+                                if (headerEdit.getText().length() == 0 && bodyEdit.getText()
+                                        .length() == 0) {
                                     if (!thisIsNewNote) noteList.remove(position);
                                 } else {
                                     if (thisIsNewNote) noteList.add(note);
@@ -109,20 +115,21 @@ public class NoteEditor implements NoteRepository {
                                     note.setBodyText(bodyEdit.getText().toString());
                                     note.setHasDeadLine(hasDeadLineEdit.isChecked());
                                     note.setEpochDeadLineDate(EpochDeadLineDate);
-                                    note.setEpochModifyDate(ThisApp.getEpochDate(LocalDateTime.now())); //не обрезано, т.е. с точностью до секунд
+                                    note.setEpochModifyDate(ThisApp.getEpochDate(LocalDateTime
+                                            .now())); //не обрезано, т.е. с точностью до секунд
                                     saveNote(note);
                                 }
                                 notesAdapter.notifyDataSetChanged();
                             }
                         })
-                .setNegativeButton("Отмена",
+                .setNegativeButton(context.getString(R.string.cancel_string),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 notesAdapter.notifyDataSetChanged();
                                 dialog.cancel();
                             }
                         });
-        if (!thisIsNewNote) mDialogBuilder.setNeutralButton("Удалить запись",
+        if (!thisIsNewNote) mDialogBuilder.setNeutralButton(context.getString(R.string.delete_note),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         deleteById(note.getId());
@@ -137,12 +144,6 @@ public class NoteEditor implements NoteRepository {
         AlertDialog alertDialog = mDialogBuilder.create();
         alertDialog.show();
 
-    }
-
-
-    @Override
-    public Note getNoteById(long id) {
-        return ThisApp.getNoteRepository().getNoteById(id);
     }
 
     @Override

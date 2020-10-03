@@ -5,12 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 
 import com.konovodov.diplom.comparators.DeadLineComparator;
 import com.konovodov.diplom.comparators.HasDeadLineComparator;
-import com.konovodov.diplom.comparators.IsDoneComparator;
+import com.konovodov.diplom.comparators.IsCompletedComparator;
 import com.konovodov.diplom.comparators.ModifyDateComparator;
 
 import java.util.ArrayList;
@@ -21,17 +20,17 @@ public class SQLiteNoteRepository implements NoteRepository {
 
     private final String LOG_TAG = "SQLiteRep";
     private final String TABLE_NAME = "Notes_Table";
-    private DBHelper dbHelper;
-    private List<Note> noteList;
+    private final DBHelper dbHelper;
+    private final List<Note> noteList;
 
     private static final HasDeadLineComparator hasDeadLineComparator = new HasDeadLineComparator();
     private static final DeadLineComparator deadLineComparator = new DeadLineComparator();
     private static final ModifyDateComparator modifyDateComparator = new ModifyDateComparator();
-    private static final IsDoneComparator isDoneComparator = new IsDoneComparator();
+    private static final IsCompletedComparator IS_COMPLETED_COMPARATOR = new IsCompletedComparator();
 
 
     // создаем объект для данных
-    ContentValues cv = new ContentValues();
+    final ContentValues cv = new ContentValues();
 
 
     public SQLiteNoteRepository(Context context) {
@@ -50,7 +49,6 @@ public class SQLiteNoteRepository implements NoteRepository {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            Log.d(LOG_TAG, "--- onCreate database ---");
             // создаем таблицу с полями
             db.execSQL("create table " + TABLE_NAME + " ("
                     + "id integer primary key autoincrement,"
@@ -70,11 +68,6 @@ public class SQLiteNoteRepository implements NoteRepository {
 
 
     @Override
-    public Note getNoteById(long id) {
-        return null;
-    }
-
-    @Override
     public List<Note> getNotes() {
         return noteList;
     }
@@ -82,7 +75,6 @@ public class SQLiteNoteRepository implements NoteRepository {
     private void loadNotes() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        Log.d(LOG_TAG, "--- Rows in table: ---");
         // делаем запрос всех данных из таблицы mytable, получаем Cursor
         Cursor c = db.query(TABLE_NAME, null, null, null, null, null, null);
 
@@ -107,19 +99,10 @@ public class SQLiteNoteRepository implements NoteRepository {
                         intToBoolean(c.getInt(isCompletedIndex)));
 
                 noteList.add(note);
-                Log.d(LOG_TAG,
-                        "ID = " + c.getInt(idColIndex) +
-                                ", header = " + c.getString(headerColIndex) +
-                                ", body = " + c.getString(bodyColIndex) +
-                                ", hasDeadLine = " + c.getInt(hasDeadLineIndex) +
-                                ", epochDeadLineDate = " + c.getInt(epochDeadLineDateIndex) +
-                                ", epochModifyDate = " + c.getInt(epochModifyDateIndex) +
-                                ", isCompleted = " + c.getInt(isCompletedIndex));
                 // переход на следующую строку
                 // а если следующей нет (текущая - последняя), то false - выходим из цикла
             } while (c.moveToNext());
-        } else
-            Log.d(LOG_TAG, "0 rows");
+        }
         c.close();
         dbHelper.close();
     }
@@ -130,9 +113,7 @@ public class SQLiteNoteRepository implements NoteRepository {
         // подключаемся к БД
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        Log.d(LOG_TAG, "--- Insert in TABLE_NAME: ---");
         // подготовим данные для вставки в виде пар: наименование столбца - значение
-
         cv.put("header", note.getHeaderText());
         cv.put("body", note.getBodyText());
         cv.put("hasDeadLine", booleanToInt(note.hasDeadLine()));
@@ -143,12 +124,10 @@ public class SQLiteNoteRepository implements NoteRepository {
         if (note.getId() == 0) {     //если id=0, то это новая запись
             // вставляем запись и получаем ее ID
             note.setId(db.insert(TABLE_NAME, null, cv));
-            Log.d(LOG_TAG, "row inserted, ID = " + note.getId());
         } else {
             // если id != 0, то обновляем по id
             int updCount = db.update(TABLE_NAME, cv, "id = ?",
                     new String[]{"" + note.getId()});
-            Log.d(LOG_TAG, "updated rows count = " + updCount);
         }
         dbHelper.close();
     }
@@ -158,13 +137,13 @@ public class SQLiteNoteRepository implements NoteRepository {
     public void deleteById(long id) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         int delCount = db.delete(TABLE_NAME, "id = " + id, null);
-        Log.d(LOG_TAG, "deleted rows count = " + delCount);
         dbHelper.close();
     }
 
 
     public void sortNotes() {
-        Collections.sort(getNotes(), isDoneComparator.thenComparing(hasDeadLineComparator).thenComparing(deadLineComparator).thenComparing(modifyDateComparator));
+        Collections.sort(getNotes(), IS_COMPLETED_COMPARATOR.thenComparing(hasDeadLineComparator)
+                .thenComparing(deadLineComparator).thenComparing(modifyDateComparator));
     }
 
 
@@ -174,7 +153,6 @@ public class SQLiteNoteRepository implements NoteRepository {
     }
 
     private boolean intToBoolean(int in) {
-        if (in == 0) return false;
-        return true;
+        return in != 0;
     }
 }

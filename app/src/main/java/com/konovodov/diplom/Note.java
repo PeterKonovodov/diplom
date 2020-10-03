@@ -10,7 +10,8 @@ public class Note {
     private boolean isCompleted;
     private long id;
 
-    public Note(long id, String headerText, String bodyText, boolean hasDeadLine, long EpochDeadLineDate, long EpochModifyDate, boolean isCompleted) {
+    public Note(long id, String headerText, String bodyText, boolean hasDeadLine,
+                long EpochDeadLineDate, long EpochModifyDate, boolean isCompleted) {
         this.id = id;
         this.headerText = headerText;
         this.bodyText = bodyText;

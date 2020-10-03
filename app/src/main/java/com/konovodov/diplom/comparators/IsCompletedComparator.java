@@ -4,7 +4,7 @@ import com.konovodov.diplom.Note;
 
 import java.util.Comparator;
 
-public class IsDoneComparator implements Comparator<Note> {
+public class IsCompletedComparator implements Comparator<Note> {
     @Override
     public int compare(Note n1, Note n2) {
         if(n1.isCompleted() && !n2.isCompleted()) return 1;

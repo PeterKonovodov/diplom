@@ -17,9 +17,9 @@ import static com.konovodov.diplom.ThisApp.SECONDS_PER_DAY;
 
 public class NotesAdapter extends BaseAdapter {
 
-    private Context context;
-    private LayoutInflater inflater;
-    private List<Note> noteList;
+    private final Context context;
+    private final LayoutInflater inflater;
+    private final List<Note> noteList;
 
 
     public NotesAdapter(Context context, List<Note> noteList) {
@@ -29,19 +29,7 @@ public class NotesAdapter extends BaseAdapter {
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public void addNote(Note note) {
-        this.noteList.add(note);
-        notifyDataSetChanged();
-    }
 
-    public void removeNote(int position) {
-        noteList.remove(position);
-        notifyDataSetChanged();
-    }
-
-    public List<Note> getNoteList() {
-        return noteList;
-    }
 
     @Override
     public int getCount() {
@@ -68,12 +56,6 @@ public class NotesAdapter extends BaseAdapter {
         if (view == null) {
             view = inflater.inflate(R.layout.note_view, parent, false);
         }
-/*
-        if(position == 0) {
-            View notesListViewScreen = view.findViewById(R.id.notesListViewScreen);
-            notesListViewScreen.setLayoutParams();
-        }
-*/
 
         Note note = noteList.get(position);
 
@@ -90,12 +72,12 @@ public class NotesAdapter extends BaseAdapter {
         if (note.hasDeadLine()) {
             deadlineText.setVisibility(View.VISIBLE);
             LocalDateTime date = ThisApp.getDateOfEpoch(note.getEpochDeadLineDate());
-            deadlineText.setText(context.getString(R.string.deadline_string_formatted, ThisApp.getFormattedDate(date)));
+            deadlineText.setText(context.getString(R.string.deadline_string_formatted,
+                    ThisApp.getFormattedDate(date)));
 
             long currentEpochDate = ThisApp.getEpochDateNowTruncDays();
             long epochDeadLineDate = note.getEpochDeadLineDate();
 
-//            long deltaEpochDate_inDays = (epochDeadLineDate / SECONDS_PER_DAY) - (currentEpochDate / SECONDS_PER_DAY);
             long deltaEpochDate_inDays = (epochDeadLineDate - currentEpochDate) / SECONDS_PER_DAY;
 
             cardColor = R.color.colorCard;      //цвет по умолчанию
@@ -105,14 +87,14 @@ public class NotesAdapter extends BaseAdapter {
 
             switch ((int) deltaEpochDate_inDays) {
                 case -1:
-                    deadlineText.setText(context.getString(R.string.deadline_string_formatted, "вчера"));
+                    deadlineText.setText(context.getString(R.string.deadline_string_formatted, context.getString(R.string.yesterday_string)));
                     break;
                 case 0:
                     cardColor = R.color.colorTodaysCard;
-                    deadlineText.setText(context.getString(R.string.deadline_string_formatted, "сегодня"));
+                    deadlineText.setText(context.getString(R.string.deadline_string_formatted, context.getString(R.string.today_string)));
                     break;
                 case 1:
-                    deadlineText.setText(context.getString(R.string.deadline_string_formatted, "завтра"));
+                    deadlineText.setText(context.getString(R.string.deadline_string_formatted, context.getString(R.string.tomorrow_string)));
                     break;
                 default:
                     break;
@@ -126,24 +108,14 @@ public class NotesAdapter extends BaseAdapter {
             deadlineText.setText("выполнено");
             deadlineText.setVisibility(View.VISIBLE);
             cardColor = R.color.colorDoneCard;
-
-//            headerText.setPaintFlags(headerText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-//            bodyText.setPaintFlags(bodyText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        } else {
-//            headerText.setPaintFlags(headerText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-//            bodyText.setPaintFlags(bodyText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
-
         if (headerText.getText().length() == 0) headerText.setVisibility(View.GONE);
         else headerText.setVisibility(View.VISIBLE);
         if (bodyText.getText().length() == 0) bodyText.setVisibility(View.GONE);
         else bodyText.setVisibility(View.VISIBLE);
 
-//        card.setCardBackgroundColor(ColorStateList.valueOf(context.getResources().getColor(cardColor)));
         card.setCardBackgroundColor(ContextCompat.getColor(context, cardColor));
 
-        LocalDateTime time = ThisApp.getDateOfEpoch(note.getEpochModifyDate());
-//        modifyDateText.setText(context.getString(R.string.modify_string, time.format(formatter)));
         modifyDateText.setVisibility(View.GONE);
 
         return view;

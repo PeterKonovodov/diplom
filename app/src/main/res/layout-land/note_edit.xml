@@ -7,7 +7,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cardEdit"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="top"
         android:layout_margin="5dp"
         card_view:cardBackgroundColor="@color/colorCard"
@@ -59,9 +59,11 @@
             <DatePicker
                 android:id="@+id/deadLinePicker"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:calendarViewShown="false"
+                android:minHeight="30dp"
+
                 android:datePickerMode="spinner" />
 
         </LinearLayout>

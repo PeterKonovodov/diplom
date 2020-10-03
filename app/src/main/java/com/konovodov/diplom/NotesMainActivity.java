@@ -1,5 +1,8 @@
 package com.konovodov.diplom;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -16,8 +19,11 @@ import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
+import java.util.Locale;
 
 public class NotesMainActivity extends AppCompatActivity {
+
+    private String appLocale;   //возможные значения - "en" и "ru"
 
     private NotesAdapter notesAdapter;
     private List<Note> noteList;
@@ -27,9 +33,6 @@ public class NotesMainActivity extends AppCompatActivity {
     private View getKeyScreen;
 
 
-    public NotesMainActivity() {
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,12 +41,9 @@ public class NotesMainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         initNotesListView();
         pinManager = new PinManager(this);
-
-
+        loadAppLocale();
+        setLocale(false);
     }
-
-
-
 
 
     @Override
@@ -51,12 +51,13 @@ public class NotesMainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        if(ThisApp.isColdAppStart()) {
+        if (ThisApp.isColdAppStart()) {
             ThisApp.setColdAppStart(false);
 
-            if(pinManager.hasPin()) {
+            if (pinManager.hasPin()) {
                 //при наличии пин-кода скрываем список и открываем запрос пина
-                ((TextView)findViewById(R.id.get_key_screen_header)).setText(getString(R.string.enter_pin));
+                ((TextView) findViewById(R.id.get_key_screen_header))
+                        .setText(getString(R.string.enter_pin));
 
                 //скрываем из меню возможность установки нового пина при первичном запросе
                 MenuItem menuSetPinItem = toolbar.getMenu().findItem(R.id.action_set_new_pin);
@@ -70,8 +71,9 @@ public class NotesMainActivity extends AppCompatActivity {
                 pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
                     @Override
                     public void doThis() {
-                        if(pinManager.checkPin(pinManager.getEnteredPin())) {
-                            Toast.makeText(NotesMainActivity.this, getString(R.string.pin_confirmed), Toast.LENGTH_SHORT).show();
+                        if (pinManager.checkPin(pinManager.getEnteredPin())) {
+                            Toast.makeText(NotesMainActivity.this, getString(R.string.pin_confirmed),
+                                    Toast.LENGTH_SHORT).show();
                             Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 public void run() {
@@ -84,8 +86,7 @@ public class NotesMainActivity extends AppCompatActivity {
                         }
                     }
                 });
-            }
-            else {
+            } else {
                 notesListViewScreen.setVisibility(View.VISIBLE);
                 getKeyScreen.setVisibility(View.INVISIBLE);
             }
@@ -93,9 +94,6 @@ public class NotesMainActivity extends AppCompatActivity {
             notesListViewScreen.setVisibility(View.VISIBLE);
             getKeyScreen.setVisibility(View.INVISIBLE);
         }
-
-
-
 
         return true;
     }
@@ -105,8 +103,21 @@ public class NotesMainActivity extends AppCompatActivity {
 
         int id = item.getItemId();
 
+        if (id == R.id.action_set_english) {
+            appLocale = "en";
+            setLocale(true);
+            saveAppLocale();
+            return true;
+        }
+        if (id == R.id.action_set_russian) {
+            appLocale = "ru";
+            setLocale(true);
+            saveAppLocale();
+            return true;
+        }
+
         if (id == R.id.action_set_new_pin) {
-            ((TextView)findViewById(R.id.get_key_screen_header)).setText(getString(R.string.enter_new_pin));
+            ((TextView) findViewById(R.id.get_key_screen_header)).setText(getString(R.string.enter_new_pin));
             notesListViewScreen.setVisibility(View.INVISIBLE);
             getKeyScreen.setVisibility(View.VISIBLE);
             pinManager.clearEnteredPin();
@@ -118,14 +129,15 @@ public class NotesMainActivity extends AppCompatActivity {
             pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
                 @Override
                 public void doThis() {
-                    Toast.makeText(NotesMainActivity.this, getString(R.string.pin_set), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(NotesMainActivity.this, getString(R.string.pin_set),
+                            Toast.LENGTH_SHORT).show();
                     Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         public void run() {
                             notesListViewScreen.setVisibility(View.VISIBLE);
                             getKeyScreen.setVisibility(View.INVISIBLE);
                             pinManager.saveNew(pinManager.getEnteredPin());
-                            item.setVisible(true);            //заряжаем коллбэк на получение и сохранение нового пинкода
+                            item.setVisible(true);
 
                         }
                     }, 2000); //specify the number of milliseconds
@@ -135,12 +147,14 @@ public class NotesMainActivity extends AppCompatActivity {
         }
 
         if (id == R.id.action_reset_pin) {
-            if(!pinManager.hasPin()) {
-                Toast.makeText(NotesMainActivity.this, getString(R.string.pin_not_exist), Toast.LENGTH_SHORT).show();
+            if (!pinManager.hasPin()) {
+                Toast.makeText(NotesMainActivity.this, getString(R.string.pin_not_exist),
+                        Toast.LENGTH_SHORT).show();
                 return false;
             }
             //при наличии пин-кода скрываем список и открываем запрос пина
-            ((TextView)findViewById(R.id.get_key_screen_header)).setText(getString(R.string.pin_confirm_to_delete));
+            ((TextView) findViewById(R.id.get_key_screen_header))
+                    .setText(getString(R.string.pin_confirm_to_delete));
 
             notesListViewScreen.setVisibility(View.INVISIBLE);
             getKeyScreen.setVisibility(View.VISIBLE);
@@ -149,8 +163,9 @@ public class NotesMainActivity extends AppCompatActivity {
             pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
                 @Override
                 public void doThis() {
-                    if(pinManager.checkPin(pinManager.getEnteredPin())) {
-                        Toast.makeText(NotesMainActivity.this, getString(R.string.pin_deleted), Toast.LENGTH_SHORT).show();
+                    if (pinManager.checkPin(pinManager.getEnteredPin())) {
+                        Toast.makeText(NotesMainActivity.this, getString(R.string.pin_deleted)
+                                , Toast.LENGTH_SHORT).show();
                         pinManager.clearPin();
                         Handler handler = new Handler();
                         handler.postDelayed(new Runnable() {
@@ -185,9 +200,6 @@ public class NotesMainActivity extends AppCompatActivity {
         notesAdapter = new NotesAdapter(this, noteList);
 
 
-
-
-
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -199,17 +211,41 @@ public class NotesMainActivity extends AppCompatActivity {
 
         notesListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-//                Toast.makeText(NotesMainActivity.this, getString(R.string.default_header), Toast.LENGTH_SHORT).show();
-//                noteEditor.editNote(new Note(getString(R.string.default_header), getString(R.string.default_body), true, LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(0)), LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(0))));
+            public boolean onItemLongClick(AdapterView<?> parent, View view,
+                                           int position, long id) {
                 noteEditor.editNote(notesAdapter, position);
                 return true;
             }
         });
     }
 
+    private void loadAppLocale() {
+        SharedPreferences sharedPreferences;
+        sharedPreferences = getSharedPreferences("appLocale", Context.MODE_PRIVATE);
+        if (sharedPreferences.contains("appLocale")) {
+            appLocale = sharedPreferences.getString("appLocale", "");
+        } else appLocale = "en";
+    }
+
+    private void saveAppLocale() {
+        SharedPreferences sharedPreferences;
+        sharedPreferences = getSharedPreferences("appLocale", Context.MODE_PRIVATE);
+        sharedPreferences.edit().putString("appLocale", appLocale).apply();
+    }
+
+    private void setLocale(boolean neetToRecreate) {
+        Locale locale;
+        locale = new Locale(appLocale);
+        Configuration config = new Configuration();
+        config.setLocale(locale);
+        getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
+
+
+        if(neetToRecreate) recreate();
+    }
 
 }
+
 
 /*
     @Override
