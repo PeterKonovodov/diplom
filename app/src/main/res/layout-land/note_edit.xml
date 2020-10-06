@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardEdit"
@@ -15,27 +16,29 @@
         card_view:cardElevation="5dp"
         card_view:cardUseCompatPadding="true">
 
+
         <LinearLayout
+            android:id="@+id/rl"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="6"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <EditText
                 android:id="@+id/headerEdit"
                 style="@style/AppTheme.HeaderEdit"
-                android:text=""
                 />
 
-
             <EditText
+
                 android:id="@+id/bodyEdit"
                 style="@style/AppTheme.BodyEdit"
 />
 
             <LinearLayout
+                android:id="@+id/ll"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                >
 
                 <CheckBox
                     android:id="@+id/hasdeadlineEdit"
@@ -54,17 +57,16 @@
                     android:layout_marginStart="40dp"
                     android:text="@string/completed_string" />
 
+                <DatePicker
+                    android:id="@+id/deadLinePicker"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:calendarViewShown="false"
+                    android:datePickerMode="spinner" />
+
             </LinearLayout>
 
-            <DatePicker
-                android:id="@+id/deadLinePicker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:calendarViewShown="false"
-                android:minHeight="30dp"
-
-                android:datePickerMode="spinner" />
 
         </LinearLayout>
 

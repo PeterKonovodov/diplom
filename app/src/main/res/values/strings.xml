@@ -10,7 +10,9 @@
     <string name="pin_set">PIN is set</string>
     <string name="set_english">English</string>
     <string name="set_russian">Русский</string>
+    <string name="switch_language">sw.lang.</string>
     <string name="pin_confirmed">PIN confirmed!</string>
+    <string name="pin_wrong">Wrong PIN!</string>
     <string name="pin_not_exist">PIN is not exist!</string>
     <string name="pin_deleted">PIN deleted!</string>
     <string name="pin_confirm_to_delete">Confirm PIN to delete!</string>

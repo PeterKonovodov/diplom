@@ -10,7 +10,9 @@
     <string name="pin_set">ПИН установлен</string>
     <string name="set_english">English</string>
     <string name="set_russian">Русский</string>
+    <string name="switch_language">sw.lang.</string>
     <string name="pin_confirmed">ПИН подтвержден!</string>
+    <string name="pin_wrong">Неверный PIN!</string>
     <string name="pin_not_exist">ПИН отсутствует!</string>
     <string name="pin_deleted">ПИН удален!</string>
     <string name="pin_confirm_to_delete">Подтвердите ПИН для удаления!</string>

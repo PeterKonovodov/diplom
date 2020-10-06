@@ -7,30 +7,26 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import java.util.List;
 import java.util.Locale;
 
 public class NotesMainActivity extends AppCompatActivity {
 
+    private PinFragment pinFragment;
+    private NoteListFragment noteListFragment;
+
+    private FragmentManager fragmentManager = getSupportFragmentManager();
+
+
     private String appLocale;   //возможные значения - "en" и "ru"
 
-    private NotesAdapter notesAdapter;
-    private List<Note> noteList;
     private Toolbar toolbar;
-    private PinManager pinManager;
-    private View notesListViewScreen;
-    private View getKeyScreen;
 
 
     @Override
@@ -39,60 +35,66 @@ public class NotesMainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        initNotesListView();
-        pinManager = new PinManager(this);
+
+        noteListFragment = new NoteListFragment();
+        pinFragment = new PinFragment();
         loadAppLocale();
         setLocale(false);
     }
 
 
     @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
+        //вынужден был здесь сделать вот это:
+        setLocaleIcon(); //т.к. getMenuInflater() затирает все иконки
+        //При переключении языка через меню происходит следующее безобразие
+        //setLocaleIcon()  ->  onCreateOptionsMenu() -> getMenuInflater(), setLocaleIcon();
+        //т.е. setLocaleIcon вызывается 2 раза!
+        //кроме того не исключена утечка памяти из-за лишних вызовов getMenuInflater()
+        // лучше перебдеть, чем недобдеть!
+
         if (ThisApp.isColdAppStart()) {
             ThisApp.setColdAppStart(false);
 
-            if (pinManager.hasPin()) {
+            if (ThisApp.getPinStore().hasPin()) {
+
+                pinFragment.setScreenHeader(getString(R.string.enter_pin));
+                fragmentManager.beginTransaction().add(R.id.fragmentContainer, pinFragment).commit();
+
                 //при наличии пин-кода скрываем список и открываем запрос пина
-                ((TextView) findViewById(R.id.get_key_screen_header))
-                        .setText(getString(R.string.enter_pin));
-
-                //скрываем из меню возможность установки нового пина при первичном запросе
-                MenuItem menuSetPinItem = toolbar.getMenu().findItem(R.id.action_set_new_pin);
-                menuSetPinItem.setVisible(false);
-
-                notesListViewScreen.setVisibility(View.INVISIBLE);
-                getKeyScreen.setVisibility(View.VISIBLE);
-
 
                 //заряжаем коллбэк на сравнение по завершению ввода
-                pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
+                pinFragment.SetWhatToDoWithPin(new PinFragment.WhatToDoWithPin() {
                     @Override
                     public void doThis() {
-                        if (pinManager.checkPin(pinManager.getEnteredPin())) {
+                        if (pinFragment.checkPin(pinFragment.getEnteredPin())) {
                             Toast.makeText(NotesMainActivity.this, getString(R.string.pin_confirmed),
                                     Toast.LENGTH_SHORT).show();
                             Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 public void run() {
-                                    notesListViewScreen.setVisibility(View.VISIBLE);
-                                    getKeyScreen.setVisibility(View.INVISIBLE);
-                                    menuSetPinItem.setVisible(true);
-
+                                    fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment).commit();
+                                    //menuSetPinItem.setVisible(true);
                                 }
                             }, 2000); //specify the number of milliseconds
+                        } else {
+                            Toast.makeText(NotesMainActivity.this, getString(R.string.pin_wrong),
+                                    Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
             } else {
-                notesListViewScreen.setVisibility(View.VISIBLE);
-                getKeyScreen.setVisibility(View.INVISIBLE);
+                fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment).commit();
             }
         } else {
-            notesListViewScreen.setVisibility(View.VISIBLE);
-            getKeyScreen.setVisibility(View.INVISIBLE);
         }
 
         return true;
@@ -103,30 +105,27 @@ public class NotesMainActivity extends AppCompatActivity {
 
         int id = item.getItemId();
 
-        if (id == R.id.action_set_english) {
-            appLocale = "en";
+        if (id == R.id.action_switch_language) {
+            if ("ru".equals(appLocale)) {
+                appLocale = "en";
+            } else {
+                appLocale = "ru";
+            }
             setLocale(true);
-            saveAppLocale();
-            return true;
-        }
-        if (id == R.id.action_set_russian) {
-            appLocale = "ru";
-            setLocale(true);
+            setLocaleIcon();
             saveAppLocale();
             return true;
         }
 
         if (id == R.id.action_set_new_pin) {
-            ((TextView) findViewById(R.id.get_key_screen_header)).setText(getString(R.string.enter_new_pin));
-            notesListViewScreen.setVisibility(View.INVISIBLE);
-            getKeyScreen.setVisibility(View.VISIBLE);
-            pinManager.clearEnteredPin();
 
+            pinFragment.setScreenHeader(getString(R.string.enter_new_pin));
+            pinFragment.clearEnteredPin();
+            fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment).commit();
             //
             item.setVisible(false);
             //заряжаем коллбэк на получение и сохранение нового пинкода
-
-            pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
+            pinFragment.SetWhatToDoWithPin(new PinFragment.WhatToDoWithPin() {
                 @Override
                 public void doThis() {
                     Toast.makeText(NotesMainActivity.this, getString(R.string.pin_set),
@@ -134,11 +133,9 @@ public class NotesMainActivity extends AppCompatActivity {
                     Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         public void run() {
-                            notesListViewScreen.setVisibility(View.VISIBLE);
-                            getKeyScreen.setVisibility(View.INVISIBLE);
-                            pinManager.saveNew(pinManager.getEnteredPin());
+                            fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment).commit();
+                            pinFragment.saveNew(pinFragment.getEnteredPin());
                             item.setVisible(true);
-
                         }
                     }, 2000); //specify the number of milliseconds
                 }
@@ -147,77 +144,48 @@ public class NotesMainActivity extends AppCompatActivity {
         }
 
         if (id == R.id.action_reset_pin) {
-            if (!pinManager.hasPin()) {
+
+            if (!pinFragment.hasPin()) {
                 Toast.makeText(NotesMainActivity.this, getString(R.string.pin_not_exist),
                         Toast.LENGTH_SHORT).show();
-                return false;
-            }
-            //при наличии пин-кода скрываем список и открываем запрос пина
-            ((TextView) findViewById(R.id.get_key_screen_header))
-                    .setText(getString(R.string.pin_confirm_to_delete));
+            } else {
+                pinFragment.setScreenHeader(getString(R.string.pin_confirm_to_delete));
+                pinFragment.clearEnteredPin();
 
-            notesListViewScreen.setVisibility(View.INVISIBLE);
-            getKeyScreen.setVisibility(View.VISIBLE);
-            pinManager.clearEnteredPin();
-            //заряжаем коллбэк на сравнение по завершению ввода
-            pinManager.SetWhatToDoWithPin(new PinManager.WhatToDoWithPin() {
-                @Override
-                public void doThis() {
-                    if (pinManager.checkPin(pinManager.getEnteredPin())) {
-                        Toast.makeText(NotesMainActivity.this, getString(R.string.pin_deleted)
-                                , Toast.LENGTH_SHORT).show();
-                        pinManager.clearPin();
-                        Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            public void run() {
-                                notesListViewScreen.setVisibility(View.VISIBLE);
-                                getKeyScreen.setVisibility(View.INVISIBLE);
-                            }
-                        }, 2000); //specify the number of milliseconds
+                //при наличии пин-кода скрываем список и открываем запрос пина
+                fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment).commit();
+
+
+                //заряжаем коллбэк на сравнение по завершению ввода
+                pinFragment.SetWhatToDoWithPin(new PinFragment.WhatToDoWithPin() {
+                    @Override
+                    public void doThis() {
+                        if (pinFragment.checkPin(pinFragment.getEnteredPin())) {
+                            Toast.makeText(NotesMainActivity.this, getString(R.string.pin_deleted)
+                                    , Toast.LENGTH_SHORT).show();
+                            pinFragment.clearPin();
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                public void run() {
+                                    fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment).commit();
+                                }
+                            }, 2000); //specify the number of milliseconds
+                        } else {
+                            Toast.makeText(NotesMainActivity.this, getString(R.string.pin_wrong),
+                                    Toast.LENGTH_SHORT).show();
+
+                        }
                     }
-                }
-            });
+                });
+            }
+
+
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-
-    public void initNotesListView() {
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setAlpha(0.5f);
-        ListView notesListView = findViewById(R.id.notesListView);
-
-        notesListViewScreen = findViewById(R.id.notesListViewScreen);
-        getKeyScreen = findViewById(R.id.get_key_screen);
-
-        setSupportActionBar(toolbar);
-
-        NoteEditor noteEditor = new NoteEditor(NotesMainActivity.this);
-        noteList = ThisApp.getNoteRepository().getNotes();
-        notesAdapter = new NotesAdapter(this, noteList);
-
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                noteEditor.editNote(notesAdapter, noteList.size());
-            }
-        });
-
-        notesListView.setAdapter(notesAdapter);
-
-        notesListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view,
-                                           int position, long id) {
-                noteEditor.editNote(notesAdapter, position);
-                return true;
-            }
-        });
-    }
 
     private void loadAppLocale() {
         SharedPreferences sharedPreferences;
@@ -236,12 +204,24 @@ public class NotesMainActivity extends AppCompatActivity {
     private void setLocale(boolean neetToRecreate) {
         Locale locale;
         locale = new Locale(appLocale);
+
         Configuration config = new Configuration();
         config.setLocale(locale);
         getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
 
+        if (neetToRecreate) recreate();
+    }
 
-        if(neetToRecreate) recreate();
+    //после этого происходит перерисовка AppBar и Menu в нем. Соответственно вызывается
+    // onCreateOptionsMenu. Я боюсь, что из-за повторного getMenuInflater() будет еще и утечка памяти
+
+    private void setLocaleIcon() {
+        ImageView logoIcon = findViewById(R.id.logoImage);
+        if ("ru".equals(appLocale)) {
+            toolbar.getMenu().findItem(R.id.action_switch_language).setIcon(R.mipmap.ru);
+        } else {
+            toolbar.getMenu().findItem(R.id.action_switch_language).setIcon(R.mipmap.uk);
+        }
     }
 
 }

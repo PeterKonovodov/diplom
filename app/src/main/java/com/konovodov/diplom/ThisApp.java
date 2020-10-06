@@ -1,6 +1,7 @@
 package com.konovodov.diplom;
 
 import android.app.Application;
+import android.content.Context;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -67,5 +68,6 @@ public class ThisApp extends Application {
     public static void setColdAppStart(boolean coldAppStart) {
         ThisApp.coldAppStart = coldAppStart;
     }
+
 
 }
