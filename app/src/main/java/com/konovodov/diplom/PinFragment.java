@@ -21,7 +21,7 @@ public class PinFragment extends Fragment implements PinStore {
     private String screenHeader;
     private StringBuilder enteredPin = new StringBuilder();
     private final int MAX_PIN_DIGITS = 4;
-    private WhatToDoWithPin whatToDoWithPin = null; //это объект интерфейса, выполняющий действия
+    public WhatToDoWithPin whatToDoWithPin = null; //это объект интерфейса, выполняющий действия
     // при наборе полного пинкода. В некоторых случаях это проверка,
     // в некоторых - получение нового пина, в других - подтверждение пинкода для его сброса
 
@@ -74,11 +74,22 @@ public class PinFragment extends Fragment implements PinStore {
         }
     }
 
-
+    // Fires when a configuration change occurs and fragment needs to save state
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString("screenHeader", screenHeader);
+        super.onSaveInstanceState(outState);
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        if (savedInstanceState != null) {
+            screenHeader = savedInstanceState.getString("screenHeader");
+        }
         // Inflate the layout for this fragment
+
+
         fragmentView = inflater.inflate(R.layout.get_pin, container, false);
         initViews();
 

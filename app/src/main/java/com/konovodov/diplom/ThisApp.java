@@ -69,5 +69,4 @@ public class ThisApp extends Application {
         ThisApp.coldAppStart = coldAppStart;
     }
 
-
 }

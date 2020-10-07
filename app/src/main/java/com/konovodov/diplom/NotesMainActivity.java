@@ -5,11 +5,13 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
@@ -18,10 +20,12 @@ import java.util.Locale;
 
 public class NotesMainActivity extends AppCompatActivity {
 
-    private PinFragment pinFragment;
     private NoteListFragment noteListFragment;
+    private final String NOTESLIST_FRAGMENT_TAG = "NOTESLIST_FRAGMENT_TAG";
+    private PinFragment pinFragment;
+    private final String PIN_FRAGMENT_TAG = "PIN_FRAGMENT_TAG";
 
-    private FragmentManager fragmentManager = getSupportFragmentManager();
+    private FragmentManager fragmentManager;
 
 
     private String appLocale;   //возможные значения - "en" и "ru"
@@ -35,11 +39,34 @@ public class NotesMainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        fragmentManager = getSupportFragmentManager();
 
-        noteListFragment = new NoteListFragment();
-        pinFragment = new PinFragment();
+
+        if (savedInstanceState != null) {
+            noteListFragment = (NoteListFragment)
+                    getSupportFragmentManager().findFragmentByTag(NOTESLIST_FRAGMENT_TAG);
+            pinFragment = (PinFragment)
+                    getSupportFragmentManager().findFragmentByTag(PIN_FRAGMENT_TAG);
+        }
+
+        if (noteListFragment == null) {
+            noteListFragment = new NoteListFragment();
+        }
+        if (pinFragment == null) {
+            pinFragment = new PinFragment();
+        }
+
+
         loadAppLocale();
         setLocale(false);
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+//        outState.putIntegerArrayList("deletedIndexes", deletedIndexes);
+        //outState.put
+//        Log.i(TAG, String.format("onSaveInstanceState, %d indexes saved", deletedIndexes.size()));
     }
 
 
@@ -53,13 +80,7 @@ public class NotesMainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        //вынужден был здесь сделать вот это:
-        setLocaleIcon(); //т.к. getMenuInflater() затирает все иконки
-        //При переключении языка через меню происходит следующее безобразие
-        //setLocaleIcon()  ->  onCreateOptionsMenu() -> getMenuInflater(), setLocaleIcon();
-        //т.е. setLocaleIcon вызывается 2 раза!
-        //кроме того не исключена утечка памяти из-за лишних вызовов getMenuInflater()
-        // лучше перебдеть, чем недобдеть!
+        setLocaleIcon();
 
         if (ThisApp.isColdAppStart()) {
             ThisApp.setColdAppStart(false);
@@ -67,7 +88,7 @@ public class NotesMainActivity extends AppCompatActivity {
             if (ThisApp.getPinStore().hasPin()) {
 
                 pinFragment.setScreenHeader(getString(R.string.enter_pin));
-                fragmentManager.beginTransaction().add(R.id.fragmentContainer, pinFragment).commit();
+                fragmentManager.beginTransaction().add(R.id.fragmentContainer, pinFragment, PIN_FRAGMENT_TAG).commit();
 
                 //при наличии пин-кода скрываем список и открываем запрос пина
 
@@ -81,7 +102,7 @@ public class NotesMainActivity extends AppCompatActivity {
                             Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 public void run() {
-                                    fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment).commit();
+                                    fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment, NOTESLIST_FRAGMENT_TAG).commit();
                                     //menuSetPinItem.setVisible(true);
                                 }
                             }, 2000); //specify the number of milliseconds
@@ -92,7 +113,7 @@ public class NotesMainActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment, NOTESLIST_FRAGMENT_TAG).commit();
             }
         } else {
         }
@@ -111,9 +132,8 @@ public class NotesMainActivity extends AppCompatActivity {
             } else {
                 appLocale = "ru";
             }
-            setLocale(true);
-            setLocaleIcon();
             saveAppLocale();
+            setLocale(true);
             return true;
         }
 
@@ -121,7 +141,7 @@ public class NotesMainActivity extends AppCompatActivity {
 
             pinFragment.setScreenHeader(getString(R.string.enter_new_pin));
             pinFragment.clearEnteredPin();
-            fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment, PIN_FRAGMENT_TAG).commit();
             //
             item.setVisible(false);
             //заряжаем коллбэк на получение и сохранение нового пинкода
@@ -133,7 +153,7 @@ public class NotesMainActivity extends AppCompatActivity {
                     Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         public void run() {
-                            fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment).commit();
+                            fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment, NOTESLIST_FRAGMENT_TAG).commit();
                             pinFragment.saveNew(pinFragment.getEnteredPin());
                             item.setVisible(true);
                         }
@@ -153,7 +173,7 @@ public class NotesMainActivity extends AppCompatActivity {
                 pinFragment.clearEnteredPin();
 
                 //при наличии пин-кода скрываем список и открываем запрос пина
-                fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment, PIN_FRAGMENT_TAG).commit();
 
 
                 //заряжаем коллбэк на сравнение по завершению ввода
@@ -167,7 +187,7 @@ public class NotesMainActivity extends AppCompatActivity {
                             Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 public void run() {
-                                    fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment).commit();
+                                    fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment, NOTESLIST_FRAGMENT_TAG).commit();
                                 }
                             }, 2000); //specify the number of milliseconds
                         } else {
@@ -201,7 +221,7 @@ public class NotesMainActivity extends AppCompatActivity {
         sharedPreferences.edit().putString("appLocale", appLocale).apply();
     }
 
-    private void setLocale(boolean neetToRecreate) {
+    private void setLocale(boolean needToRecreate) {
         Locale locale;
         locale = new Locale(appLocale);
 
@@ -209,14 +229,13 @@ public class NotesMainActivity extends AppCompatActivity {
         config.setLocale(locale);
         getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
 
-        if (neetToRecreate) recreate();
+        if (needToRecreate) recreate();
     }
 
     //после этого происходит перерисовка AppBar и Menu в нем. Соответственно вызывается
     // onCreateOptionsMenu. Я боюсь, что из-за повторного getMenuInflater() будет еще и утечка памяти
 
     private void setLocaleIcon() {
-        ImageView logoIcon = findViewById(R.id.logoImage);
         if ("ru".equals(appLocale)) {
             toolbar.getMenu().findItem(R.id.action_switch_language).setIcon(R.mipmap.ru);
         } else {
