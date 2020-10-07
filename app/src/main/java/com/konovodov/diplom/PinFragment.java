@@ -18,6 +18,7 @@ public class PinFragment extends Fragment implements PinStore {
 
 
     private View fragmentView;
+    private int fragmentState;
     private String screenHeader;
     private StringBuilder enteredPin = new StringBuilder();
     private final int MAX_PIN_DIGITS = 4;
@@ -28,6 +29,25 @@ public class PinFragment extends Fragment implements PinStore {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        fragmentState = getArguments().getInt("fragmentState", 0);
+        fragmentState = getArguments().getInt("fragmentState", 0);
+
+
+    }
+    public static PinFragment getInstance(int state, OnPinEntered onPinEntered) {
+        PinFragment fragment = new PinFragment();
+        fragment.setOnPinEntered(onPinEntered);
+        Bundle args = new Bundle();
+        args.putInt("fragmentState", state);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    //этот метод устанавливает требуемый коллбэк при завершении ввода пинкода.
+    //а сам коллбэк делается из интерфейса OnPinEntered
+    public void setOnPinEntered(OnPinEntered onPinEntered) {
+        this.onPinEntered = onPinEntered;
     }
 
 
@@ -49,11 +69,6 @@ public class PinFragment extends Fragment implements PinStore {
         pinBarRefresh(--enteredPinKeyLength);
     }
 
-    //этот метод устанавливает требуемый коллбэк при завершении ввода пинкода.
-    //а сам коллбэк делается из интерфейса OnPinEntered
-    public void SetOnPinEntered(OnPinEntered onPinEntered) {
-        this.onPinEntered = onPinEntered;
-    }
 
     public void clearEnteredPin() {
         int enteredPinKeyLength = enteredPin.length();
@@ -100,8 +115,6 @@ public class PinFragment extends Fragment implements PinStore {
         return fragmentView;
 
     }
-
-
 
 
     public void initViews() {

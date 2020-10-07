@@ -57,12 +57,15 @@ public class NotesMainActivity extends AppCompatActivity {
                     getSupportFragmentManager().findFragmentByTag(PIN_FRAGMENT_TAG);
         }
 
+        //снабжение пересозданного фрагмента нужным колбэком (в зависимости от состояния приложения)
+        if (pinFragment != null) {
+            pinFragment.setOnPinEntered(getOnPinEntered(activityState));
+        }
+
         if (noteListFragment == null) {
             noteListFragment = new NoteListFragment();
         }
-        if (pinFragment == null) {
-            pinFragment = new PinFragment();
-        }
+
 
         loadAppLocale();
         setLocale(false);
@@ -72,9 +75,6 @@ public class NotesMainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putInt("activityState", activityState);
         super.onSaveInstanceState(outState);
-//        outState.putIntegerArrayList("deletedIndexes", deletedIndexes);
-        //outState.put
-//        Log.i(TAG, String.format("onSaveInstanceState, %d indexes saved", deletedIndexes.size()));
     }
 
 
@@ -90,23 +90,15 @@ public class NotesMainActivity extends AppCompatActivity {
 
         setLocaleIcon();
 
-        switch (activityState) {
-            case SET_NEW_PIN:
-                setNewPIN();
-                break;
-            case RESET_PIN:
-                resetPIN();
-                break;
-            case VIEW_NOTES:
-                viewNotes();
-                break;
-            default:
-                if (pinFragment.hasPin()) {
-                    checkPIN();
-                }
-                else viewNotes();
-                break;
+        if(ThisApp.isColdAppStart()) {
+            ThisApp.setColdAppStart(false);
+
+            if (ThisApp.getPinStore().hasPin()) {
+                checkPIN();
+            }
+            else viewNotes();
         }
+
         return true;
     }
 
@@ -183,95 +175,106 @@ public class NotesMainActivity extends AppCompatActivity {
     private void setNewPIN() {
         activityState = SET_NEW_PIN;
 
-        pinFragment.setScreenHeader(getString(R.string.enter_new_pin));
-        pinFragment.clearEnteredPin();
+        pinFragment = PinFragment.getInstance(activityState, getOnPinEntered(activityState));
+
+//        pinFragment.setScreenHeader(getString(R.string.enter_new_pin));
+//        pinFragment.clearEnteredPin();
         fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment, PIN_FRAGMENT_TAG).commit();
         //
 //    item.setVisible(false);
         //заряжаем коллбэк на получение и сохранение нового пинкода
-        pinFragment.SetOnPinEntered(new PinFragment.OnPinEntered() {
-            @Override
-            public void onPinEntered() {
-                Toast.makeText(NotesMainActivity.this, getString(R.string.pin_set),
-                        Toast.LENGTH_SHORT).show();
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    public void run() {
-                        pinFragment.saveNew(pinFragment.getEnteredPin());
-                        viewNotes();
-                        //                  item.setVisible(true);
-                    }
-                }, 2000); //specify the number of milliseconds
-            }
-        });
     }
 
     private void checkPIN() {
         activityState = CHECK_PIN;
-        fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment, PIN_FRAGMENT_TAG).commit();
-        pinFragment.setScreenHeader(getString(R.string.enter_pin));
-
-        //при наличии пин-кода скрываем список и открываем запрос пина
-
         //заряжаем коллбэк на сравнение по завершению ввода
-        pinFragment.SetOnPinEntered(new PinFragment.OnPinEntered() {
-            @Override
-            public void onPinEntered() {
-                if (pinFragment.checkPin(pinFragment.getEnteredPin())) {
-                    Toast.makeText(NotesMainActivity.this, getString(R.string.pin_confirmed),
-                            Toast.LENGTH_SHORT).show();
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        public void run() {
-                            viewNotes();
-                            //menuSetPinItem.setVisible(true);
-                        }
-                    }, 2000); //specify the number of milliseconds
-                } else {
-                    Toast.makeText(NotesMainActivity.this, getString(R.string.pin_wrong),
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        pinFragment = PinFragment.getInstance(activityState, getOnPinEntered(activityState));
+        fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment, PIN_FRAGMENT_TAG).commit();
+//        pinFragment.setScreenHeader(getString(R.string.enter_pin));
     }
 
     private void resetPIN() {
         activityState = RESET_PIN;
 
+        //заряжаем коллбэк на сравнение по завершению ввода
+        pinFragment = PinFragment.getInstance(activityState, getOnPinEntered(activityState));
         if (!pinFragment.hasPin()) {
             Toast.makeText(NotesMainActivity.this, getString(R.string.pin_not_exist),
                     Toast.LENGTH_SHORT).show();
         } else {
-            pinFragment.setScreenHeader(getString(R.string.pin_confirm_to_delete));
-            pinFragment.clearEnteredPin();
-
+//            pinFragment.setScreenHeader(getString(R.string.pin_confirm_to_delete));
+//            pinFragment.clearEnteredPin();
             //при наличии пин-кода скрываем список и открываем запрос пина
             fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment, PIN_FRAGMENT_TAG).commit();
-
-
-            //заряжаем коллбэк на сравнение по завершению ввода
-            pinFragment.SetOnPinEntered(new PinFragment.OnPinEntered() {
-                @Override
-                public void onPinEntered() {
-                    if (pinFragment.checkPin(pinFragment.getEnteredPin())) {
-                        Toast.makeText(NotesMainActivity.this, getString(R.string.pin_deleted)
-                                , Toast.LENGTH_SHORT).show();
-                        pinFragment.clearPin();
-                        Handler handler = new Handler();
-                        handler.postDelayed(new Runnable() {
-                            public void run() {
-                                viewNotes();
-                            }
-                        }, 2000); //specify the number of milliseconds
-                    } else {
-                        Toast.makeText(NotesMainActivity.this, getString(R.string.pin_wrong),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
         }
 
     }
+
+
+    private PinFragment.OnPinEntered getOnPinEntered(int activityState) {
+        switch (activityState) {
+            case SET_NEW_PIN:
+                return new PinFragment.OnPinEntered() {
+                @Override
+                public void onPinEntered() {
+                    Toast.makeText(NotesMainActivity.this, getString(R.string.pin_set),
+                            Toast.LENGTH_SHORT).show();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            pinFragment.saveNew(pinFragment.getEnteredPin());
+                            viewNotes();
+                            //                  item.setVisible(true);
+                        }
+                    }, 1300); //specify the number of milliseconds
+                }
+            };
+            case CHECK_PIN:
+                return new PinFragment.OnPinEntered() {
+                    @Override
+                    public void onPinEntered() {
+                        if (pinFragment.checkPin(pinFragment.getEnteredPin())) {
+                            Toast.makeText(NotesMainActivity.this, getString(R.string.pin_confirmed),
+                                    Toast.LENGTH_SHORT).show();
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                public void run() {
+                                    viewNotes();
+                                    //menuSetPinItem.setVisible(true);
+                                }
+                            }, 1300); //specify the number of milliseconds
+                        } else {
+                            Toast.makeText(NotesMainActivity.this, getString(R.string.pin_wrong),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                };
+            case RESET_PIN:
+                return new PinFragment.OnPinEntered() {
+                    @Override
+                    public void onPinEntered() {
+                        if (pinFragment.checkPin(pinFragment.getEnteredPin())) {
+                            Toast.makeText(NotesMainActivity.this, getString(R.string.pin_deleted)
+                                    , Toast.LENGTH_SHORT).show();
+                            pinFragment.clearPin();
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                public void run() {
+                                    viewNotes();
+                                }
+                            }, 1300); //specify the number of milliseconds
+                        } else {
+                            Toast.makeText(NotesMainActivity.this, getString(R.string.pin_wrong),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                };
+            default: return null;
+        }
+    }
+
+
+
 
 }
 /*
