@@ -21,7 +21,7 @@ public class PinFragment extends Fragment implements PinStore {
     private String screenHeader;
     private StringBuilder enteredPin = new StringBuilder();
     private final int MAX_PIN_DIGITS = 4;
-    public WhatToDoWithPin whatToDoWithPin = null; //это объект интерфейса, выполняющий действия
+    public OnPinEntered onPinEntered = null; //это объект интерфейса, выполняющий действия
     // при наборе полного пинкода. В некоторых случаях это проверка,
     // в некоторых - получение нового пина, в других - подтверждение пинкода для его сброса
 
@@ -50,9 +50,9 @@ public class PinFragment extends Fragment implements PinStore {
     }
 
     //этот метод устанавливает требуемый коллбэк при завершении ввода пинкода.
-    //а сам коллбэк делается из интерфейса WhatToDoWithPin
-    public void SetWhatToDoWithPin(WhatToDoWithPin whatToDoWithPin) {
-        this.whatToDoWithPin = whatToDoWithPin;
+    //а сам коллбэк делается из интерфейса OnPinEntered
+    public void SetOnPinEntered(OnPinEntered onPinEntered) {
+        this.onPinEntered = onPinEntered;
     }
 
     public void clearEnteredPin() {
@@ -77,7 +77,7 @@ public class PinFragment extends Fragment implements PinStore {
     // Fires when a configuration change occurs and fragment needs to save state
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putString("screenHeader", screenHeader);
+//        outState.putString("screenHeader", screenHeader);
         super.onSaveInstanceState(outState);
     }
     @Override
@@ -85,7 +85,7 @@ public class PinFragment extends Fragment implements PinStore {
                              Bundle savedInstanceState) {
 
         if (savedInstanceState != null) {
-            screenHeader = savedInstanceState.getString("screenHeader");
+//            screenHeader = savedInstanceState.getString("screenHeader");
         }
         // Inflate the layout for this fragment
 
@@ -101,9 +101,13 @@ public class PinFragment extends Fragment implements PinStore {
 
     }
 
+
+
+
     public void initViews() {
         int[] digitPinPads = new int[]{R.id.pad0, R.id.pad1, R.id.pad2, R.id.pad3, R.id.pad4,
                 R.id.pad5, R.id.pad6, R.id.pad7, R.id.pad8, R.id.pad9};
+
 
         Button.OnClickListener padOnClickListener = new Button.OnClickListener() {
 
@@ -118,8 +122,8 @@ public class PinFragment extends Fragment implements PinStore {
                     }
                     if (i == digitPinPads.length) return;
                     addDigitToPin((char) (i + 0x30));
-                    if (enteredPin.length() == MAX_PIN_DIGITS && whatToDoWithPin != null) {
-                        whatToDoWithPin.doThis();
+                    if (enteredPin.length() == MAX_PIN_DIGITS && onPinEntered != null) {
+                        onPinEntered.onPinEntered();
                     }
                 }
 
@@ -200,8 +204,8 @@ public class PinFragment extends Fragment implements PinStore {
         ThisApp.getPinStore().clearPin();
     }
 
-    public interface WhatToDoWithPin {
-        void doThis();
+    public interface OnPinEntered {
+        void onPinEntered();
     }
 
     public void setScreenHeader(String screenHeader) {
