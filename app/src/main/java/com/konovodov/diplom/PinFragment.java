@@ -17,14 +17,11 @@ public class PinFragment extends Fragment implements PinStore {
 
     private View fragmentView;
     private int activityState;
-    //enteredPin - переменная, заполняемая в листенере, т.е. в статическом контексте
-    //поэтому тоже статическая, иначе наблюдаются баги
-    private static StringBuilder enteredPin = new StringBuilder();
+    private StringBuilder enteredPin = new StringBuilder();
     private final int MAX_PIN_DIGITS = 4;
-    private static OnPinEntered onPinEntered = null; //это ссылка на объект интерфейса, выполняющий действия
+    private OnPinEntered onPinEntered = null; //это ссылка на объект интерфейса, выполняющий действия
     // при наборе полного пинкода. В некоторых случаях это проверка,
     // в некоторых - получение нового пина, в других - подтверждение пинкода для его сброса
-    // должна быть static, чтобы при пересоздании фрагмента колбэк не пропадал.
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -102,7 +99,7 @@ public class PinFragment extends Fragment implements PinStore {
 
     public static PinFragment getInstance(int activityState, OnPinEntered onPinEntered) {
         PinFragment fragment = new PinFragment();
-        enteredPin = new StringBuilder("");
+        fragment.enteredPin = new StringBuilder("");
         fragment.setOnPinEntered(onPinEntered);
         Bundle args = new Bundle();
         args.putInt("activityState", activityState);

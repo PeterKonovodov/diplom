@@ -7,12 +7,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
+import java.util.Objects;
 
 public class NoteListFragment extends Fragment {
 
@@ -47,7 +49,7 @@ public class NoteListFragment extends Fragment {
         ListView notesListView = fragmentView.findViewById(R.id.notesListView);
         NoteEditor noteEditor = new NoteEditor(getActivity());
         noteList = ThisApp.getNoteRepository().getNotes();
-        notesAdapter = new NotesAdapter(getActivity(), noteList);
+        notesAdapter = new NotesAdapter(Objects.requireNonNull(getActivity()), noteList);
 
 
         fab.setOnClickListener(new View.OnClickListener() {

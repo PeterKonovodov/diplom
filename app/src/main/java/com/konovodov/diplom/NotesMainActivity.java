@@ -67,6 +67,12 @@ public class NotesMainActivity extends AppCompatActivity {
             noteListFragment = new NoteListFragment();
         }
 
+        //снабжаем фрагмент правильным колбэком
+        if (pinFragment != null) {
+            pinFragment.setOnPinEntered(getOnPinEntered(activityState));
+        }
+
+
         loadAppLocale();
         setLocale(false);
     }

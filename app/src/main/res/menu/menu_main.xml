@@ -53,7 +53,7 @@
         android:id="@+id/action_no"
         android:enabled="false"
         android:orderInCategory="40"
-        android:title="v1.3"
+        android:title="v1.5"
         app:showAsAction="never"
         tools:ignore="HardcodedText" />
 
