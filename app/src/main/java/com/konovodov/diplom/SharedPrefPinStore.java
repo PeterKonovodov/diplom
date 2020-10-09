@@ -49,8 +49,6 @@ public class SharedPrefPinStore implements PinStore {
         if (sharedPreferences.contains("pin")) {
             String appPin = deCrypt(sharedPreferences.getString("pin", null));
             if (appPin == null) return false;
-
-            //вставить попытку дешифровки
             return pin.equals(appPin);
         }
         return false;

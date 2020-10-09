@@ -24,11 +24,14 @@
             <EditText
                 android:id="@+id/headerEdit"
                 style="@style/AppTheme.HeaderEdit"
-                android:text="" />
+                android:text=""
+                android:hint="@string/default_header"/>
 
             <EditText
                 android:id="@+id/bodyEdit"
-                style="@style/AppTheme.BodyEdit" />
+                style="@style/AppTheme.BodyEdit"
+                android:hint="@string/default_body"
+                />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -44,7 +47,7 @@
                     android:text="@string/deadline_string" />
 
                 <CheckBox
-                    android:id="@+id/isDoneEdit"
+                    android:id="@+id/isCompletedEdit"
                     style="@style/AppTheme.BodyEdit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -28,10 +28,8 @@ public class SQLiteNoteRepository implements NoteRepository {
     private static final ModifyDateComparator modifyDateComparator = new ModifyDateComparator();
     private static final IsCompletedComparator IS_COMPLETED_COMPARATOR = new IsCompletedComparator();
 
-
     // создаем объект для данных
     final ContentValues cv = new ContentValues();
-
 
     public SQLiteNoteRepository(Context context) {
         // создаем объект для создания и управления версиями БД

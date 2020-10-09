@@ -1,15 +1,15 @@
 <resources>
     <string name="app_name">eNotes!</string>
-    <string name="default_header">Динозавры были покрыты перьями</string>
-    <string name="default_body">То, что многие динозавры были пернатыми, ученые заподозрили давно,
-        тем более, что отпечатки перьев периодически попадались в местах раскопок.</string>
+    <string name="default_header">About Procyon</string>
+    <string name="default_body">Like Sirius B, Procyon B is a white dwarf that was inferred from astrometric data long before it was observed.</string>
     <string name="deadline_string">deadline</string>
     <string name="deadline_string_formatted">deadline: %s</string>
-    <string name="set_new_pin">Set new PIN</string>
-    <string name="reset_pin">Reset PIN</string>
+    <string name="set_new_pin">set new PIN</string>
+    <string name="reset_pin">reset PIN</string>
     <string name="pin_set">PIN is set</string>
     <string name="set_english">English</string>
     <string name="set_russian">Русский</string>
+    <string name="set_afrikaans">Afrikaans</string>
     <string name="switch_language">sw.lang.</string>
     <string name="pin_confirmed">PIN confirmed!</string>
     <string name="pin_wrong">Wrong PIN!</string>
@@ -25,6 +25,7 @@
     <string name="today_string">today</string>
     <string name="tomorrow_string">tomorrow</string>
     <string name="yesterday_string">yesterday</string>
+    <string name="backpress_more">To exit press BACK once more!</string>
 
 
 </resources>

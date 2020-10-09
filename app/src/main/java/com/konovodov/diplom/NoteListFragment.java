@@ -29,7 +29,6 @@ public class NoteListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         fragmentView = inflater.inflate(R.layout.notes_list_view, container, false);
         initViews();
         return fragmentView;
@@ -46,8 +45,6 @@ public class NoteListFragment extends Fragment {
         FloatingActionButton fab = fragmentView.findViewById(R.id.fab);
         fab.setAlpha(0.5f);
         ListView notesListView = fragmentView.findViewById(R.id.notesListView);
-
-
         NoteEditor noteEditor = new NoteEditor(getActivity());
         noteList = ThisApp.getNoteRepository().getNotes();
         notesAdapter = new NotesAdapter(getActivity(), noteList);

@@ -18,24 +18,27 @@ import java.util.Locale;
 
 public class NotesMainActivity extends AppCompatActivity {
 
+    private static FragmentManager fragmentManager;
     private NoteListFragment noteListFragment;
-    private final String NOTESLIST_FRAGMENT_TAG = "NOTESLIST_FRAGMENT_TAG";
     private PinFragment pinFragment;
+    //тэги, необходимые для поиска фрагмента после пересоздания активити (чтобы его не пересоздавать)
+    private final String NOTESLIST_FRAGMENT_TAG = "NOTESLIST_FRAGMENT_TAG";
     private final String PIN_FRAGMENT_TAG = "PIN_FRAGMENT_TAG";
 
+    //переменная, отражающая состояние активити, нужна для логики, управляющей пересозданием
+    //активити с текущими фрагментами.
     private int activityState;
-    private final int INIT_STATE = 0;
-    private final int CHECK_PIN = 1;
-    private final int SET_NEW_PIN = 2;
-    private final int RESET_PIN = 3;
-    private final int VIEW_NOTES = 4;
+    public final int INIT_STATE = 0;
+    public static final int CHECK_PIN = 1;
+    public static final int SET_NEW_PIN = 2;
+    public static final int RESET_PIN = 3;
+    public static final int VIEW_NOTES = 4;
+    private boolean coldAppStart = true;
+    //переменные, необходимые для подсчета количества нажатий на кн. BACK для выхода из приложения
+    private int backPressedCount;
+    private long timeout;
 
-
-    private FragmentManager fragmentManager;
-
-
-    private String appLocale;   //возможные значения - "en" и "ru"
-
+    private String appLocale;   //текущая локаль в строковом выражении
     private Toolbar toolbar;
 
 
@@ -47,6 +50,8 @@ public class NotesMainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         fragmentManager = getSupportFragmentManager();
         activityState = INIT_STATE;
+        backPressedCount = 0;
+        timeout = System.currentTimeMillis();
 
 
         if (savedInstanceState != null) {
@@ -55,21 +60,17 @@ public class NotesMainActivity extends AppCompatActivity {
                     getSupportFragmentManager().findFragmentByTag(NOTESLIST_FRAGMENT_TAG);
             pinFragment = (PinFragment)
                     getSupportFragmentManager().findFragmentByTag(PIN_FRAGMENT_TAG);
-        }
-
-        //снабжение пересозданного фрагмента нужным колбэком (в зависимости от состояния приложения)
-        if (pinFragment != null) {
-            pinFragment.setOnPinEntered(getOnPinEntered(activityState));
-        }
+            coldAppStart = false;
+        } else coldAppStart = true;
 
         if (noteListFragment == null) {
             noteListFragment = new NoteListFragment();
         }
 
-
         loadAppLocale();
         setLocale(false);
     }
+
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -79,26 +80,40 @@ public class NotesMainActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        setLocaleIcon();
+        //скрываем из меню пункт выбора текущего языка
+        if ("en".equals(appLocale))
+            toolbar.getMenu().findItem(R.id.action_set_english).setVisible(false);
+        if ("ru".equals(appLocale))
+            toolbar.getMenu().findItem(R.id.action_set_russian).setVisible(false);
+        if ("af".equals(appLocale))
+            toolbar.getMenu().findItem(R.id.action_set_afrikaans).setVisible(false);
 
-        if(ThisApp.isColdAppStart()) {
-            ThisApp.setColdAppStart(false);
+        //обработка холодного старта. Начальная проверка пинкода запускается только здесь.
+        if (coldAppStart) {
+            coldAppStart = false;
 
             if (ThisApp.getPinStore().hasPin()) {
                 checkPIN();
-            }
-            else viewNotes();
+            } else viewNotes();
         }
 
+        if (noteListFragment != null) {
+            if (noteListFragment.isAdded()) {
+                toolbar.getMenu().findItem(R.id.action_set_new_pin).setVisible(true);
+                toolbar.getMenu().findItem(R.id.action_reset_pin).setVisible(true);
+            }
+        }
+        //скрываем из меню настроек пункты с манипуляцией пин-кодом, если находимся в
+        //экране работы с ним
+        if (pinFragment != null) {
+            if (pinFragment.isAdded()) {
+                toolbar.getMenu().findItem(R.id.action_set_new_pin).setVisible(false);
+                toolbar.getMenu().findItem(R.id.action_reset_pin).setVisible(false);
+            }
+        }
         return true;
     }
 
@@ -107,30 +122,30 @@ public class NotesMainActivity extends AppCompatActivity {
 
         int id = item.getItemId();
 
-        if (id == R.id.action_switch_language) {
-            if ("ru".equals(appLocale)) {
-                appLocale = "en";
-            } else {
+        switch (id) {
+            case R.id.action_set_russian:
                 appLocale = "ru";
-            }
-            saveAppLocale();
-            setLocale(true);
-            return true;
+                saveAppLocale();
+                setLocale(true);
+                break;
+            case R.id.action_set_english:
+                appLocale = "en";
+                saveAppLocale();
+                setLocale(true);
+                break;
+            case R.id.action_set_afrikaans:
+                appLocale = "af";
+                saveAppLocale();
+                setLocale(true);
+                break;
+            case R.id.action_set_new_pin:
+                setNewPIN();
+                break;
+            case R.id.action_reset_pin:
+                resetPIN();
+                break;
         }
-
-        if (id == R.id.action_set_new_pin) {
-
-            setNewPIN();
-            return true;
-        }
-
-        if (id == R.id.action_reset_pin) {
-            resetPIN();
-
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
 
@@ -159,76 +174,58 @@ public class NotesMainActivity extends AppCompatActivity {
         if (needToRecreate) recreate();
     }
 
-    private void setLocaleIcon() {
-        if ("ru".equals(appLocale)) {
-            toolbar.getMenu().findItem(R.id.action_switch_language).setIcon(R.mipmap.ru);
-        } else {
-            toolbar.getMenu().findItem(R.id.action_switch_language).setIcon(R.mipmap.uk);
-        }
-    }
-
-    private void viewNotes() {
-        activityState = VIEW_NOTES;
-        fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment, NOTESLIST_FRAGMENT_TAG).commit();
-    }
 
     private void setNewPIN() {
         activityState = SET_NEW_PIN;
-
         pinFragment = PinFragment.getInstance(activityState, getOnPinEntered(activityState));
-
-//        pinFragment.setScreenHeader(getString(R.string.enter_new_pin));
-//        pinFragment.clearEnteredPin();
         fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment, PIN_FRAGMENT_TAG).commit();
-        //
-//    item.setVisible(false);
-        //заряжаем коллбэк на получение и сохранение нового пинкода
+        toolbar.getMenu().findItem(R.id.action_set_new_pin).setVisible(false);
+        toolbar.getMenu().findItem(R.id.action_reset_pin).setVisible(false);
     }
 
     private void checkPIN() {
         activityState = CHECK_PIN;
-        //заряжаем коллбэк на сравнение по завершению ввода
         pinFragment = PinFragment.getInstance(activityState, getOnPinEntered(activityState));
         fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment, PIN_FRAGMENT_TAG).commit();
-//        pinFragment.setScreenHeader(getString(R.string.enter_pin));
+        toolbar.getMenu().findItem(R.id.action_set_new_pin).setVisible(false);
+        toolbar.getMenu().findItem(R.id.action_reset_pin).setVisible(false);
     }
 
     private void resetPIN() {
         activityState = RESET_PIN;
-
-        //заряжаем коллбэк на сравнение по завершению ввода
         pinFragment = PinFragment.getInstance(activityState, getOnPinEntered(activityState));
         if (!pinFragment.hasPin()) {
             Toast.makeText(NotesMainActivity.this, getString(R.string.pin_not_exist),
                     Toast.LENGTH_SHORT).show();
         } else {
-//            pinFragment.setScreenHeader(getString(R.string.pin_confirm_to_delete));
-//            pinFragment.clearEnteredPin();
-            //при наличии пин-кода скрываем список и открываем запрос пина
+            toolbar.getMenu().findItem(R.id.action_set_new_pin).setVisible(false);
+            toolbar.getMenu().findItem(R.id.action_reset_pin).setVisible(false);
             fragmentManager.beginTransaction().replace(R.id.fragmentContainer, pinFragment, PIN_FRAGMENT_TAG).commit();
         }
-
     }
 
 
+    //Этот метод возвращает метод обратного вызова (колбэк), передаваемый фрагменту PinFragment
+//в зависимости от состояния активити
+//Используется как в ручном выборе режима работы (из меню), так и при пересоздании активити
+//с фрагментом
     private PinFragment.OnPinEntered getOnPinEntered(int activityState) {
         switch (activityState) {
             case SET_NEW_PIN:
                 return new PinFragment.OnPinEntered() {
-                @Override
-                public void onPinEntered() {
-                    Toast.makeText(NotesMainActivity.this, getString(R.string.pin_set),
-                            Toast.LENGTH_SHORT).show();
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        public void run() {
-                            pinFragment.saveNew(pinFragment.getEnteredPin());
-                            viewNotes();
-                            //                  item.setVisible(true);
-                        }
-                    }, 1300); //specify the number of milliseconds
-                }
-            };
+                    @Override
+                    public void onPinEntered() {
+                        Toast.makeText(NotesMainActivity.this, getString(R.string.pin_set),
+                                Toast.LENGTH_SHORT).show();
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            public void run() {
+                                pinFragment.saveNew(pinFragment.getEnteredPin());
+                                viewNotes();
+                            }
+                        }, 1300); //specify the number of milliseconds
+                    }
+                };
             case CHECK_PIN:
                 return new PinFragment.OnPinEntered() {
                     @Override
@@ -240,7 +237,6 @@ public class NotesMainActivity extends AppCompatActivity {
                             handler.postDelayed(new Runnable() {
                                 public void run() {
                                     viewNotes();
-                                    //menuSetPinItem.setVisible(true);
                                 }
                             }, 1300); //specify the number of milliseconds
                         } else {
@@ -269,19 +265,45 @@ public class NotesMainActivity extends AppCompatActivity {
                         }
                     }
                 };
-            default: return null;
+            default:
+                return null;
         }
     }
 
+    private void viewNotes() {
+        activityState = VIEW_NOTES;
+        toolbar.getMenu().findItem(R.id.action_set_new_pin).setVisible(true);
+        toolbar.getMenu().findItem(R.id.action_reset_pin).setVisible(true);
+        fragmentManager.beginTransaction().replace(R.id.fragmentContainer, noteListFragment, NOTESLIST_FRAGMENT_TAG).commit();
+    }
 
-
-
-}
-/*
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+
+        switch (activityState) {
+            case SET_NEW_PIN:
+            case RESET_PIN:
+                viewNotes();
+                break;
+            //далее по кнопке BACK выход из приложения возможен только по двойному нажатию,
+            // причем второе нажатие после первого должно быть не далее чем через 3 секунды
+            default:
+                timeout = System.currentTimeMillis() - timeout;
+                if (timeout > 3000) backPressedCount = 0;
+                backPressedCount++;
+                if (backPressedCount == 1) {
+                    Toast.makeText(NotesMainActivity.this, getString(R.string.backpress_more),
+                            Toast.LENGTH_SHORT).show();
+                    timeout = System.currentTimeMillis();  //засекаем отсчет времени после первого
+                    // нажатия
+                }
+                if (backPressedCount == 2) super.onBackPressed();
+                break;
+        }
     }
-*/
+
+}
+
+
 
 

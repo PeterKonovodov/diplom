@@ -29,7 +29,7 @@
         <TextView
             android:id="@+id/body"
             style="@style/AppTheme.Body"
-            android:text="@string/default_body" />
+            tools:text="@string/default_body" />
 
         <TextView
             android:id="@+id/deadline"

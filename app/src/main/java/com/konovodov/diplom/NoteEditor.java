@@ -30,10 +30,10 @@ public class NoteEditor implements NoteRepository {
 
     public void editNote(NotesAdapter notesAdapter, int position) {
         thisIsNewNote = false;
-//        noteList = notesAdapter.getNoteList();
         noteList = getNotes();
         if (position >= noteList.size()) {
             thisIsNewNote = true;
+            //id = 0 - признак новой записи при ее сохранении
             note = new Note(0, "", "", false,
                     ThisApp.getEpochDateNowTruncDays(), 0, false);
         } else note = noteList.get(position);
@@ -46,32 +46,35 @@ public class NoteEditor implements NoteRepository {
         EditText headerEdit = noteEditDialogView.findViewById(R.id.headerEdit);
         EditText bodyEdit = noteEditDialogView.findViewById(R.id.bodyEdit);
         CheckBox hasDeadLineEdit = noteEditDialogView.findViewById(R.id.hasdeadlineEdit);
-        CheckBox isDoneEdit = noteEditDialogView.findViewById(R.id.isDoneEdit);
+        CheckBox isCompletedEdit = noteEditDialogView.findViewById(R.id.isCompletedEdit);
         DatePicker deadlinePicker = noteEditDialogView.findViewById(R.id.deadLinePicker);
 
         headerEdit.setText(note.getHeaderText());
         bodyEdit.setText(note.getBodyText());
         EpochDeadLineDate = note.getEpochDeadLineDate();
         deadLineDate = ThisApp.getDateOfEpoch(EpochDeadLineDate);
-        isDoneEdit.setChecked(note.isCompleted());
+        isCompletedEdit.setChecked(note.isCompleted());
+        if (note.getId() == 0)
+            isCompletedEdit.setVisibility(View.INVISIBLE);
+        else isCompletedEdit.setVisibility(View.VISIBLE);
 
 
         deadlinePicker.init(deadLineDate.getYear(), deadLineDate.getMonthValue() - 1,
                 deadLineDate.getDayOfMonth(), new DatePicker.OnDateChangedListener() {
-            @Override
-            public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                try {
-                    deadLineDate = deadLineDate.withYear(year).withMonth(monthOfYear + 1)
-                            .withDayOfMonth(dayOfMonth);
-                    EpochDeadLineDate = ThisApp.getEpochDate(deadLineDate);
-                    note.setCompleted(false);    //при манипуляциях с датой флаг
-                    // выполненности сбрасывается
-                    isDoneEdit.setChecked(false);
-                } catch (DateTimeException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+                    @Override
+                    public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        try {
+                            deadLineDate = deadLineDate.withYear(year).withMonth(monthOfYear + 1)
+                                    .withDayOfMonth(dayOfMonth);
+                            EpochDeadLineDate = ThisApp.getEpochDate(deadLineDate);
+                            note.setCompleted(false);    //при манипуляциях с датой флаг
+                            // выполненности сбрасывается
+                            isCompletedEdit.setChecked(false);
+                        } catch (DateTimeException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
 
         if (note.hasDeadLine()) {
             hasDeadLineEdit.setChecked(true);
@@ -82,7 +85,7 @@ public class NoteEditor implements NoteRepository {
         }
 
 
-        isDoneEdit.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        isCompletedEdit.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

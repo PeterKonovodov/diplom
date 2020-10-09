@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">eNotes!</string>
+    <string name="default_header">Oor Procyon</string>
+    <string name="default_body">Net soos Sirius B is Procyon B \'n wit dwerg wat afgelei is uit astrometriese data lank voordat dit waargeneem is.</string>
+    <string name="deadline_string">sperdatum</string>
+    <string name="deadline_string_formatted">sperdatum: %s</string>
+    <string name="set_new_pin">stel \'n nuwe PIN in</string>
+    <string name="reset_pin">stel PIN terug</string>
+    <string name="pin_set">PIN is ingestel</string>
+    <string name="set_english">English</string>
+    <string name="set_russian">Русский</string>
+    <string name="set_afrikaans">Afrikaans</string>
+    <string name="switch_language">sw.lang.</string>
+    <string name="pin_confirmed">PIN bevestig!</string>
+    <string name="pin_wrong">Verkeerde PIN!</string>
+    <string name="pin_not_exist">PIN bestaan nie!</string>
+    <string name="pin_deleted">PIN is uitgevee!</string>
+    <string name="pin_confirm_to_delete">Bevestig die PIN om uit te vee!</string>
+    <string name="enter_pin">Voer PIN in!</string>
+    <string name="enter_new_pin">Voer nuwe PIN in!</string>
+    <string name="completed_string">voltooi</string>
+    <string name="cancel_string">Kanselleer</string>
+    <string name="ok_string">ОК</string>
+    <string name="delete_note">Skrap nota</string>
+    <string name="today_string">vandag</string>
+    <string name="tomorrow_string">more</string>
+    <string name="yesterday_string">gister</string>
+    <string name="backpress_more">Druk weer \'n keer BACK om terug te keer!</string>
+
+
+</resources>

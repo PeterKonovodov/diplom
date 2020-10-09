@@ -100,12 +100,10 @@ public class NotesAdapter extends BaseAdapter {
                     break;
             }
 
-        } else {
-            deadlineText.setVisibility(View.GONE);
-        }
+        } else deadlineText.setVisibility(View.GONE);
 
         if(note.isCompleted()) {
-            deadlineText.setText("выполнено");
+            deadlineText.setText(context.getString(R.string.completed_string));
             deadlineText.setVisibility(View.VISIBLE);
             cardColor = R.color.colorDoneCard;
         }
@@ -115,7 +113,6 @@ public class NotesAdapter extends BaseAdapter {
         else bodyText.setVisibility(View.VISIBLE);
 
         card.setCardBackgroundColor(ContextCompat.getColor(context, cardColor));
-
         modifyDateText.setVisibility(View.GONE);
 
         return view;
