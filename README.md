@@ -29,8 +29,10 @@ pinStore (хранилище пинкода)
 **comparators/IsCompletedComparator.java    
 comparators/HasDeadLineComparator.java    
 comparators/DeadLineComparator.java    
-comparators/ModifyDateComparator.java** и делается это в пространстве реализации хранилища заметок    
-**SQLiteNoteRepository.java**,  которое основано на SQLite.    
+comparators/ModifyDateComparator.java** 
+и делается это в пространстве реализации хранилища заметок    
+**SQLiteNoteRepository.java**,  
+которое основано на SQLite.    
     
 **SharedPrefPinStore.java** хранит пинкод в SharedPreferences в зашифрованном     
 с помощью алгоритма AES и преобразованом в текст с помощью Base64 виде.    
@@ -65,13 +67,10 @@ comparators/ModifyDateComparator.java** и делается это в прост
 в зависимости от текущего состояния приложения activityState.  
    
 Пересоздание NotesMainActivity при смене ориентации или локализации приложения  
-приводит к пересозданию и текущего фрагмента.  
-Как выяснилось в ходе экспериментов, пересоздание фрагмента по какой-то причине   
-ведет к утере метода обратного вызова. Возможно, это происходит при выполнении метода  
-
-    fragmentView = inflater.inflate(R.layout.pin_fragment, container, false),  
-
-из-за чего никаких действий при вводе четырех цифр не происходит.  
+приводит к пересозданию и текущего фрагмента.
+При пересоздании фрагмента происходит утеря метода обратного вызова, т.к. пересозданный фрагмент - 
+это новый объект, в котором ссылка onPinEntered = null.
+Соответственно никаких действий при вводе четырех цифр не происходит.  
   
 Возможным способом обойти этот прискорбный факт могло бы стать сохранение ссылки  
 на метод обратного вызова в *savedInstanceState* фрагмента с последующим ее  
