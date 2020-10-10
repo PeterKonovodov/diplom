@@ -18,7 +18,7 @@ import java.util.Locale;
 
 public class NotesMainActivity extends AppCompatActivity {
 
-    private static FragmentManager fragmentManager;
+    private FragmentManager fragmentManager;
     private NoteListFragment noteListFragment;
     private PinFragment pinFragment;
     //тэги, необходимые для поиска фрагмента после пересоздания активити (чтобы его не пересоздавать)
@@ -45,6 +45,9 @@ public class NotesMainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        loadAppLocale();
+
         setContentView(R.layout.activity_main);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -72,9 +75,6 @@ public class NotesMainActivity extends AppCompatActivity {
             pinFragment.setOnPinEntered(getOnPinEntered(activityState));
         }
 
-
-        loadAppLocale();
-        setLocale(false);
     }
 
 
@@ -89,13 +89,21 @@ public class NotesMainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        //скрываем из меню пункт выбора текущего языка
-        if ("en".equals(appLocale))
+        //скрываем из меню пункт выбора текущего языка и меняем иконку
+        int iconId = R.mipmap.uk;   //иконка языка по умолчанию
+        toolbar.getMenu().findItem(R.id.action_switch_language).setIcon(R.mipmap.uk);
+        if ("en".equals(appLocale)) {
             toolbar.getMenu().findItem(R.id.action_set_english).setVisible(false);
-        if ("ru".equals(appLocale))
+        }
+        if ("ru".equals(appLocale)) {
             toolbar.getMenu().findItem(R.id.action_set_russian).setVisible(false);
-        if ("af".equals(appLocale))
+            iconId = R.mipmap.ru;
+        }
+        if ("af".equals(appLocale)) {
             toolbar.getMenu().findItem(R.id.action_set_afrikaans).setVisible(false);
+            iconId = R.mipmap.za;
+        }
+        toolbar.getMenu().findItem(R.id.action_switch_language).setIcon(iconId);
 
         //обработка холодного старта. Начальная проверка пинкода запускается только здесь.
         if (coldAppStart) {
@@ -132,17 +140,14 @@ public class NotesMainActivity extends AppCompatActivity {
             case R.id.action_set_russian:
                 appLocale = "ru";
                 saveAppLocale();
-                setLocale(true);
                 break;
             case R.id.action_set_english:
                 appLocale = "en";
                 saveAppLocale();
-                setLocale(true);
                 break;
             case R.id.action_set_afrikaans:
                 appLocale = "af";
                 saveAppLocale();
-                setLocale(true);
                 break;
             case R.id.action_set_new_pin:
                 setNewPIN();
@@ -161,23 +166,24 @@ public class NotesMainActivity extends AppCompatActivity {
         if (sharedPreferences.contains("appLocale")) {
             appLocale = sharedPreferences.getString("appLocale", "");
         } else appLocale = "en";
+        setLocale();
+
+    }
+
+    private void setLocale() {
+        Locale locale = new Locale(appLocale);
+        Locale.setDefault(locale);
+        Configuration config = getResources().getConfiguration();
+        config.setLocale(locale);
+        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
     }
 
     private void saveAppLocale() {
         SharedPreferences sharedPreferences;
         sharedPreferences = getSharedPreferences("appLocale", Context.MODE_PRIVATE);
         sharedPreferences.edit().putString("appLocale", appLocale).apply();
-    }
-
-    private void setLocale(boolean needToRecreate) {
-        Locale locale;
-        locale = new Locale(appLocale);
-
-        Configuration config = new Configuration();
-        config.setLocale(locale);
-        getResources().updateConfiguration(config, getBaseContext().getResources().getDisplayMetrics());
-
-        if (needToRecreate) recreate();
+        setLocale();
+        recreate();
     }
 
 
@@ -223,6 +229,7 @@ public class NotesMainActivity extends AppCompatActivity {
                     public void onPinEntered() {
                         Toast.makeText(NotesMainActivity.this, getString(R.string.pin_set),
                                 Toast.LENGTH_SHORT).show();
+
                         Handler handler = new Handler();
                         handler.postDelayed(new Runnable() {
                             public void run() {
@@ -239,6 +246,7 @@ public class NotesMainActivity extends AppCompatActivity {
                         if (pinFragment.checkPin(pinFragment.getEnteredPin())) {
                             Toast.makeText(NotesMainActivity.this, getString(R.string.pin_confirmed),
                                     Toast.LENGTH_SHORT).show();
+
                             Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 public void run() {
@@ -259,6 +267,7 @@ public class NotesMainActivity extends AppCompatActivity {
                             Toast.makeText(NotesMainActivity.this, getString(R.string.pin_deleted)
                                     , Toast.LENGTH_SHORT).show();
                             pinFragment.clearPin();
+
                             Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 public void run() {

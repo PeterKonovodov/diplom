@@ -5,9 +5,8 @@
 
     <item
         android:id="@+id/action_switch_language"
-        android:icon="@mipmap/country_icon"
         android:orderInCategory="10"
-        android:title="@string/switch_language"
+        android:title=""
         app:showAsAction="ifRoom">
         <menu>
             <item
@@ -53,7 +52,7 @@
         android:id="@+id/action_no"
         android:enabled="false"
         android:orderInCategory="40"
-        android:title="v1.5"
+        android:title="v1.6"
         app:showAsAction="never"
         tools:ignore="HardcodedText" />
 

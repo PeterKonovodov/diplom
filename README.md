@@ -30,7 +30,9 @@ pinStore (хранилище пинкода)
 comparators/HasDeadLineComparator.java    
 comparators/DeadLineComparator.java    
 comparators/ModifyDateComparator.java** 
+
 и делается это в пространстве реализации хранилища заметок    
+
 **SQLiteNoteRepository.java**,  
 которое основано на SQLite.    
     
@@ -84,8 +86,8 @@ comparators/ModifyDateComparator.java**
 
      pinFragment = (PinFragment) getSupportFragmentManager().findFragmentByTag(PIN_FRAGMENT_TAG);  
 
-после чего ему нужный метод обратного вызова взамен утерянного   
-в зависимости от состояния приложения, сохраненного на время переконфигурации  
+после чего ему передается нужный метод обратного вызова взамен утерянного   
+в зависимости от состояния приложения activityState, сохраненного на время переконфигурации  
 
      if (pinFragment != null) { pinFragment.setOnPinEntered(getOnPinEntered(activityState)); }
 
